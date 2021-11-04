@@ -43,7 +43,7 @@
 <script>
 import axios from "axios";
 
-const API_ROOT = "http://app.profcomff.com/print";
+const API_ROOT = "https://app.profcomff.com/print";
 
 export default {
   data() {
@@ -81,16 +81,19 @@ export default {
     async request() {
       console.log("Request to API");
 
-      var response = await axios.post(`${API_ROOT}/file`, {
-        body: {
-          surname: this.surname,
-          number: this.number,
+      var response = await axios.post(
+        `${API_ROOT}/file`,
+        {
+          surname: this.surname.trim(),
+          number: this.number.trim(),
           filename: this.file.name,
         },
-        headers: { "Content-Type": "application/json" },
-      });
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-      this.api_pin = JSON.parse(response.data).pin;
+      this.api_pin = response.data.pin;
       console.log(`Request done ${this.api_pin}`);
     },
 
@@ -100,9 +103,7 @@ export default {
       var body_data = new FormData();
       body_data.append("file", this.file);
 
-      await axios.post(`${API_ROOT}/file/${this.api_pin}`, {
-        body: body_data,
-      });
+      await axios.post(`${API_ROOT}/file/${this.api_pin}`, body_data);
     },
   },
 };
