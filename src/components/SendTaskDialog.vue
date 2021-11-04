@@ -52,6 +52,7 @@ export default {
       number: undefined,
       file: undefined,
       api_pin: undefined,
+      status: "PENDING",
     };
   },
   methods: {
@@ -67,13 +68,26 @@ export default {
 
     async send() {
       console.log("Start send routine");
+      this.status = "PROGRESS";
+
       try {
         await this.request();
         await this.upload();
-        console.log("Ok");
+        this.status = "OK";
       } catch (error) {
         console.error(`Произошла ошибка: ${error}`);
+        var code = undefined;
+        try {
+          code = error.response.status;
+        } finally {
+          if (code === undefined) {
+            this.status = "FAIL";
+          } else {
+            this.status = `${code}`;
+          }
+        }
       } finally {
+        this.$emit("uploaded", this.status, this.api_pin);
         console.log("Finished!");
       }
     },
@@ -110,15 +124,6 @@ export default {
 </script>
 
 <style scoped>
-h1 {
-  color: white;
-  text-transform: uppercase;
-  font-family: "PT Sans", sans-serif;
-  font-size: 4vw;
-  font-style: normal;
-  font-weight: 700;
-  max-width: 100%;
-}
 .form-item {
   height: 50px;
   width: 100%;
