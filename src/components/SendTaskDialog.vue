@@ -7,7 +7,7 @@
         type="text"
         name="surname"
         placeholder="Иванов"
-        @input="surname_on_change"
+        v-model="surname"
         required
       />
     </div>
@@ -18,8 +18,8 @@
         class="form-control"
         type="text"
         name="number"
-        placeholder="12341234"
-        @input="number_on_change"
+        placeholder="1012000"
+        v-model="number"
         required
       />
     </div>
@@ -66,13 +66,25 @@ export default {
       status: "PENDING",
     };
   },
+  mounted() {
+    if (localStorage.surname) {
+      this.surname = localStorage.surname;
+    }
+    if (localStorage.number) {
+      this.number = localStorage.number;
+    }
+  },
+  watch: {
+    surname(new_surname) {
+      console.log('new_surname', new_surname);
+      localStorage.surname = new_surname;
+    },
+    number(new_number) {
+      console.log('new_number', new_number);
+      localStorage.number = new_number;
+    },
+  },
   methods: {
-    surname_on_change(event) {
-      this.surname = event.target.value;
-    },
-    number_on_change(event) {
-      this.number = event.target.value;
-    },
     file_on_change(event) {
       this.file = event.target.files[0];
     },
