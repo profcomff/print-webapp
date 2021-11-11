@@ -1,11 +1,11 @@
 <template>
-  <div class="home">
+  <div class="home container-fluid">
     <SendTaskDialog id="send_task_dialog" @uploaded="showTaskCompleteDialog" />
     <TaskCompleteDialog
       v-if="['PENDING', 'PROGRESS'].indexOf(status) == -1"
       :status="status"
       :pin="pin"
-      @click="showSendTaskDialog"
+      @click_return="showSendTaskDialog"
     />
   </div>
 </template>
@@ -51,8 +51,17 @@ export default defineComponent({
 
 <style>
 .home {
-  width: 100%;
-  padding: 0;
-  margin: 0;
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+p, .form-group, .form-actions {
+  font-family: "PT Sans", sans-serif;
+  margin: 20px auto;
+}
+
+.form-actions {
+  background-color: transparent;
+  text-align: center;
 }
 </style>

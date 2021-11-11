@@ -1,42 +1,53 @@
 <template>
-  <form class="print-form" @submit.prevent @submit="send">
-    <p class="form-item-name" v-bind:value="surname">Фамилия:</p>
-    <input
-      class="form-item"
-      type="text"
-      name="surname"
-      placeholder="Иванов"
-      @input="surname_on_change"
-      required
-    />
+  <form class="dialog-container" @submit.prevent @submit="send">
+    <div class="form-group">
+      <label for="surname">Фамилия:</label>
+      <input
+        class="form-control"
+        type="text"
+        name="surname"
+        placeholder="Иванов"
+        @input="surname_on_change"
+        required
+      />
+    </div>
 
-    <p class="form-item-name">Номер профсоюзного билета:</p>
-    <input
-      class="form-item"
-      type="text"
-      name="number"
-      placeholder="12341234"
-      @input="number_on_change"
-      required
-    />
+    <div class="form-group">
+      <label for="number">Номер профсоюзного билета:</label>
+      <input
+        class="form-control"
+        type="text"
+        name="number"
+        placeholder="12341234"
+        @input="number_on_change"
+        required
+      />
+    </div>
 
-    <p class="form-item-name">Файл для печати в формате PDF:</p>
-    <input
-      class="form-item"
-      type="file"
-      accept="application/pdf"
-      @input="file_on_change"
-      required
-    />
+    <div class="form-group">
+      <label class="form-label" for="file"
+        >Файл для печати в формате PDF:</label
+      >
+      <input
+        class="form-control"
+        id="file"
+        type="file"
+        accept="application/pdf"
+        @input="file_on_change"
+        aria-describedby="fileHelp"
+        required
+      />
+      <small id="fileHelp" class="form-text text-muted">
+        <i>
+          Мы принимаем файлы для печати только в формате PDF и размером до 3
+          мегабайт.
+        </i>
+      </small>
+    </div>
 
-    <p class="form-item-tip">
-      <i>
-        Мы принимаем файлы для печати только в формате PDF и размером до 3
-        мегабайт.
-      </i>
-    </p>
-
-    <input class="form-item" type="submit" value="Отправить" />
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Отправить</button>
+    </div>
   </form>
 </template>
 
@@ -122,16 +133,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.form-item {
-  height: 50px;
-  width: 100%;
-}
-
-.print-form {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-</style>
