@@ -76,11 +76,9 @@ export default {
   },
   watch: {
     surname(new_surname) {
-      console.log("new_surname", new_surname);
       localStorage.surname = new_surname;
     },
     number(new_number) {
-      console.log("new_number", new_number);
       localStorage.number = new_number;
     },
   },
