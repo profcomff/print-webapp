@@ -1,5 +1,8 @@
 <template>
   <div class="home container-fluid">
+    <div v-if="!this.$route.query.embeded">
+      <h1>Бесплатный принтер</h1>
+    </div>
     <SendTaskDialog id="send_task_dialog" @uploaded="showTaskCompleteDialog" />
     <TaskCompleteDialog
       v-if="['PENDING', 'PROGRESS'].indexOf(status) == -1"
@@ -7,6 +10,11 @@
       :pin="pin"
       @click_return="showSendTaskDialog"
     />
+    <div v-if="!this.$route.query.embeded">
+      <small class="text-muted"
+        >Сделано в <a href="https://dyakov.space/">dyakov.space</a></small
+      >
+    </div>
   </div>
 </template>
 
@@ -55,7 +63,9 @@ export default defineComponent({
   margin: 30px auto;
 }
 
-p, .form-group, .form-actions {
+p,
+.form-group,
+.form-actions {
   font-family: "PT Sans", sans-serif;
   margin: 20px auto;
 }
