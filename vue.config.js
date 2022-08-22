@@ -1,6 +1,4 @@
 module.exports = {
-  publicPath: '/print-ui/',
-
   pwa: {
     name: 'Бесплатный принтер физфака',
     themeColor: '#558ab2',
