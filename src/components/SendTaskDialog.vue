@@ -54,7 +54,7 @@
 <script>
 import axios from "axios";
 
-const API_ROOT = "https://app.profcomff.com/print";
+const API_ROOT = "https://printer.api.profcomff.com";
 
 export default {
   data() {
