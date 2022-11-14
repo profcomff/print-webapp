@@ -117,7 +117,6 @@
 <script>
 import axios from "axios";
 
-const API_ROOT = "https://printer.api.profcomff.com";
 
 export default {
   data() {
@@ -181,7 +180,7 @@ export default {
       console.log("Request to API");
 
       var response = await axios.post(
-        `${API_ROOT}/file`,
+        `${process.env.VUE_APP_API_PRINTER}/file`,
         {
           surname: this.surname.trim(),
           number: this.number.trim(),
@@ -207,7 +206,7 @@ export default {
       var body_data = new FormData();
       body_data.append("file", this.file);
 
-      await axios.post(`${API_ROOT}/file/${this.api_pin}`, body_data);
+      await axios.post(`${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`, body_data);
     },
   },
 };
