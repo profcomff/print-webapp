@@ -10,6 +10,7 @@
       :pin="pin"
       @click_return="showSendTaskDialog"
     />
+    <div></div>
     <div v-if="!this.$route.query.embeded">
       <small class="text-muted"
         >Сделано в <a href="https://dyakov.space/">dyakov.space</a></small
@@ -18,7 +19,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 import SendTaskDialog from "@/components/SendTaskDialog.vue";
 import TaskCompleteDialog from "@/components/TaskCompleteDialog.vue";
@@ -36,7 +37,7 @@ export default defineComponent({
     };
   },
   methods: {
-    showTaskCompleteDialog(status: string, pin: string) {
+    showTaskCompleteDialog(status, pin) {
       console.log(`${status}, ${pin}`);
       var dialog = document.getElementById("send_task_dialog");
       this.status = status;
