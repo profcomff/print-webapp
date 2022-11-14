@@ -18,6 +18,7 @@ import { defineComponent } from "vue";
 import SendTaskDialog from "@/components/SendTaskDialog.vue";
 import TaskCompleteDialog from "@/components/TaskCompleteDialog.vue";
 import { add_history } from "@/utils/history";
+import { log_open_app, log_print } from "@/utils/marketing";
 
 export default defineComponent({
   name: "Home",
@@ -38,6 +39,7 @@ export default defineComponent({
       var dialog = document.getElementById("send_task_dialog");
       this.status = status;
       this.pin = pin;
+      log_print(status, pin);
       if (dialog !== null) {
         dialog.style.display = "none";
       }
@@ -51,6 +53,9 @@ export default defineComponent({
         dialog.style.display = "block";
       }
     },
+  },
+  mounted() {
+    log_open_app();
   },
 });
 </script>

@@ -18,6 +18,7 @@
 <script>
 import { defineComponent } from "vue";
 import { get_history } from "@/utils/history";
+import { log_open_history } from "@/utils/marketing";
 
 export default defineComponent({
   name: "Home",
@@ -29,6 +30,7 @@ export default defineComponent({
   mounted() {
     this.hist = get_history();
     this.hist.reverse();
+    log_open_history()
   },
 });
 </script>
