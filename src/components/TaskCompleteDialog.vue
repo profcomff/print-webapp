@@ -16,8 +16,7 @@
     </div>
     <div v-else-if="status == 422">
       <p class="h5">Не вышло =(</p>
-      <p class="h3">Запонены не все поля</p>
-      <sup>Как? O_o</sup>
+      <p class="h3">Проверьте параметры печати и попробуйте снова</p>
     </div>
     <div v-else>
       <p class="h5">Не вышло =(</p>

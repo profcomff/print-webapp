@@ -45,6 +45,66 @@
       </small>
     </div>
 
+    <div class="accordion accordion-flush" id="accordionFlush">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingOne">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseOne"
+            aria-expanded="false"
+            aria-controls="flush-collapseOne"
+          >
+            Больше настроек
+          </button>
+        </h2>
+        <div
+          id="flush-collapseOne"
+          class="accordion-collapse collapse"
+          aria-labelledby="flush-headingOne"
+          data-bs-parent="#accordionFlush"
+        >
+          <div class="form-group">
+            <label for="copies">Количество копий:</label>
+            <input
+              class="form-control"
+              type="number"
+              name="copies"
+              min="1"
+              max="10"
+              v-model="copies"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pages">Номера страниц:</label>
+            <input
+              class="form-control"
+              type="text"
+              name="pages"
+              placeholder="Все"
+              v-model="pages"
+            />
+            <small id="pagesHelp" class="form-text text-muted">
+              <i>Формат: 1-2, 4</i>
+            </small>
+          </div>
+
+          <div class="form-group">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="twosided"
+              v-model="twosided"
+            />
+            <label for="twosided">&nbsp;Двусторонняя печать</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Отправить</button>
     </div>
@@ -64,6 +124,9 @@ export default {
       file: undefined,
       api_pin: undefined,
       status: "PENDING",
+      copies: 1,
+      pages: "",
+      twosided: false,
     };
   },
   mounted() {
@@ -122,6 +185,11 @@ export default {
           surname: this.surname.trim(),
           number: this.number.trim(),
           filename: this.file.name,
+          options: {
+            pages: this.pages,
+            copies: this.copies,
+            two_sided: this.twosided,
+          },
         },
         {
           headers: { "Content-Type": "application/json" },
