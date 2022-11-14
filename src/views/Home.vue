@@ -1,5 +1,5 @@
 <template>
-  <div class="home container-fluid">
+  <div>
     <div v-if="!this.$route.query.embeded">
       <h1>Бесплатный принтер</h1>
     </div>
@@ -10,21 +10,6 @@
       :pin="pin"
       @click_return="showSendTaskDialog"
     />
-    <div>
-      <h3 class="accordion-header" id="histAccordion-headingOne">
-        Последние файлы:
-      </h3>
-      <ul class="hist">
-        <li v-for="item in hist" v-bind:key="item.pin" class="hist-item">
-          {{ item.pin }} <small>{{ item.name }}</small>
-        </li>
-      </ul>
-    </div>
-    <div v-if="!this.$route.query.embeded">
-      <small class="text-muted"
-        >Сделано в <a href="https://dyakov.space/">dyakov.space</a></small
-      >
-    </div>
   </div>
 </template>
 
@@ -32,6 +17,7 @@
 import { defineComponent } from "vue";
 import SendTaskDialog from "@/components/SendTaskDialog.vue";
 import TaskCompleteDialog from "@/components/TaskCompleteDialog.vue";
+import { add_history } from "@/utils/history";
 
 export default defineComponent({
   name: "Home",
@@ -41,7 +27,6 @@ export default defineComponent({
   },
   data() {
     return {
-      hist: [],
       status: "PENDING",
       pin: "",
     };
@@ -49,7 +34,7 @@ export default defineComponent({
   methods: {
     showTaskCompleteDialog(status, pin, filename) {
       console.log(`${status}, ${pin}`);
-      if (status === "OK") this.save_hist(pin, filename);
+      if (status === "OK") add_history(pin, filename);
       var dialog = document.getElementById("send_task_dialog");
       this.status = status;
       this.pin = pin;
@@ -66,31 +51,11 @@ export default defineComponent({
         dialog.style.display = "block";
       }
     },
-
-    get_hist() {
-      var hist = localStorage.getItem("print-history") || "[]";
-      this.hist = JSON.parse(hist);
-    },
-
-    save_hist(pin, name) {
-      this.hist = this.hist.slice(-5, -1);
-      this.hist.push({ pin: pin, name: name });
-      localStorage.setItem("print-history", JSON.stringify(this.hist));
-    },
-  },
-
-  mounted() {
-    this.get_hist();
   },
 });
 </script>
 
 <style>
-.home {
-  max-width: 500px;
-  margin: 30px auto;
-}
-
 p,
 .form-group,
 .form-actions {
@@ -98,9 +63,9 @@ p,
   margin: 20px auto;
 }
 
-.form-actions {
-  background-color: transparent;
-  text-align: center;
+.form-actions > .btn {
+  width: 100%;
+  margin: 10px auto;
 }
 
 .hist {

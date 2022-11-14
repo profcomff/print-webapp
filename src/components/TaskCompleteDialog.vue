@@ -26,7 +26,11 @@
       </sup>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" type="button" @click="returnButtonClick">
+      <button
+        class="btn btn-primary btn-lg"
+        type="button"
+        @click="this.$emit('click_return')"
+      >
         Вернуться
       </button>
     </div>
@@ -43,11 +47,6 @@ export default {
     pin: {
       type: String,
       required: false,
-    },
-  },
-  methods: {
-    returnButtonClick() {
-      this.$emit("click_return");
     },
   },
 };

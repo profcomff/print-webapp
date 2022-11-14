@@ -33,7 +33,7 @@
         id="file"
         type="file"
         accept="application/pdf"
-        @input="file_on_change"
+        @input="(event) => (file = event.target.files[0])"
         aria-describedby="fileHelp"
         required
       />
@@ -106,7 +106,10 @@
     </div>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Отправить</button>
+      <button type="submit" class="btn btn-success btn-lg">Отправить</button>
+      <router-link class="btn btn-primary btn-lg" to="/history">
+        История печати
+      </router-link>
     </div>
   </form>
 </template>
@@ -122,11 +125,13 @@ export default {
       surname: undefined,
       number: undefined,
       file: undefined,
-      api_pin: undefined,
-      status: "PENDING",
+
       copies: 1,
       pages: "",
       twosided: false,
+
+      api_pin: undefined,
+      status: "PENDING",
     };
   },
   mounted() {
@@ -139,17 +144,13 @@ export default {
   },
   watch: {
     surname(new_surname) {
-      localStorage.surname = new_surname;
+      localStorage.setItem("surname", new_surname);
     },
     number(new_number) {
-      localStorage.number = new_number;
+      localStorage.setItem("number", new_number);
     },
   },
   methods: {
-    file_on_change(event) {
-      this.file = event.target.files[0];
-    },
-
     async send() {
       console.log("Start send routine");
       this.status = "PROGRESS";
