@@ -171,7 +171,7 @@ export default {
           }
         }
       } finally {
-        this.$emit("uploaded", this.status, this.api_pin);
+        this.$emit("uploaded", this.status, this.api_pin, this.file.name);
         console.log("Finished!");
       }
     },
