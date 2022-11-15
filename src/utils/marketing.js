@@ -1,10 +1,10 @@
 export function get_marketing_id() {
   let marketing_id = localStorage.getItem("marketing-id");
-  if (marketing_id) return marketing_id;
+  if (marketing_id && marketing_id !== 'null') return marketing_id;
 
   const urlParams = new URLSearchParams(window.location.search);
   marketing_id = urlParams.get("marketing_id");
-  localStorage.setItem("marketing-id", marketing_id);
+  if (marketing_id) localStorage.setItem("marketing-id", marketing_id);
   return marketing_id;
 }
 
