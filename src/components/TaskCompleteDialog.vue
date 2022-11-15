@@ -16,8 +16,7 @@
     </div>
     <div v-else-if="status == 422">
       <p class="h5">Не вышло =(</p>
-      <p class="h3">Запонены не все поля</p>
-      <sup>Как? O_o</sup>
+      <p class="h3">Проверьте параметры печати и попробуйте снова</p>
     </div>
     <div v-else>
       <p class="h5">Не вышло =(</p>
@@ -27,7 +26,11 @@
       </sup>
     </div>
     <div class="form-actions">
-      <button class="btn btn-primary" type="button" @click="returnButtonClick">
+      <button
+        class="btn btn-primary btn-lg"
+        type="button"
+        @click="this.$emit('click_return')"
+      >
         Вернуться
       </button>
     </div>
@@ -44,11 +47,6 @@ export default {
     pin: {
       type: String,
       required: false,
-    },
-  },
-  methods: {
-    returnButtonClick() {
-      this.$emit("click_return");
     },
   },
 };

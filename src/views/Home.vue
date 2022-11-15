@@ -1,5 +1,5 @@
 <template>
-  <div class="home container-fluid">
+  <div>
     <div v-if="!this.$route.query.embeded">
       <h1>Бесплатный принтер</h1>
     </div>
@@ -10,18 +10,15 @@
       :pin="pin"
       @click_return="showSendTaskDialog"
     />
-    <div v-if="!this.$route.query.embeded">
-      <small class="text-muted"
-        >Сделано в <a href="https://dyakov.space/">dyakov.space</a></small
-      >
-    </div>
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from "vue";
 import SendTaskDialog from "@/components/SendTaskDialog.vue";
 import TaskCompleteDialog from "@/components/TaskCompleteDialog.vue";
+import { add_history } from "@/utils/history";
+import { log_open_app, log_print } from "@/utils/marketing";
 
 export default defineComponent({
   name: "Home",
@@ -36,15 +33,18 @@ export default defineComponent({
     };
   },
   methods: {
-    showTaskCompleteDialog(status: string, pin: string) {
+    showTaskCompleteDialog(status, pin, filename) {
       console.log(`${status}, ${pin}`);
+      if (status === "OK") add_history(pin, filename);
       var dialog = document.getElementById("send_task_dialog");
       this.status = status;
       this.pin = pin;
+      log_print(status, pin);
       if (dialog !== null) {
         dialog.style.display = "none";
       }
     },
+
     showSendTaskDialog() {
       this.status = "PENDING";
       this.pin = "";
@@ -54,15 +54,13 @@ export default defineComponent({
       }
     },
   },
+  mounted() {
+    log_open_app();
+  },
 });
 </script>
 
 <style>
-.home {
-  max-width: 500px;
-  margin: 30px auto;
-}
-
 p,
 .form-group,
 .form-actions {
@@ -70,8 +68,20 @@ p,
   margin: 20px auto;
 }
 
-.form-actions {
-  background-color: transparent;
-  text-align: center;
+.form-actions > .btn {
+  width: 100%;
+  margin: 10px auto;
+}
+
+.hist {
+  list-style: none;
+}
+.hist-item {
+  display: block;
+  margin: 20px;
+  font-size: 1.5rem;
+}
+.hist-item > small {
+  font-size: 1rem;
 }
 </style>

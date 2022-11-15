@@ -33,7 +33,7 @@
         id="file"
         type="file"
         accept="application/pdf"
-        @input="file_on_change"
+        @input="(event) => (file = event.target.files[0])"
         aria-describedby="fileHelp"
         required
       />
@@ -45,8 +45,71 @@
       </small>
     </div>
 
+    <div class="accordion accordion-flush" id="accordionFlush">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingOne">
+          <button
+            class="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#flush-collapseOne"
+            aria-expanded="false"
+            aria-controls="flush-collapseOne"
+          >
+            Больше настроек
+          </button>
+        </h2>
+        <div
+          id="flush-collapseOne"
+          class="accordion-collapse collapse"
+          aria-labelledby="flush-headingOne"
+          data-bs-parent="#accordionFlush"
+        >
+          <div class="form-group">
+            <label for="copies">Количество копий:</label>
+            <input
+              class="form-control"
+              type="number"
+              name="copies"
+              min="1"
+              max="10"
+              v-model="copies"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pages">Номера страниц:</label>
+            <input
+              class="form-control"
+              type="text"
+              name="pages"
+              placeholder="Все"
+              v-model="pages"
+            />
+            <small id="pagesHelp" class="form-text text-muted">
+              <i>Формат: 1-2, 4</i>
+            </small>
+          </div>
+
+          <div class="form-group">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              name="twosided"
+              v-model="twosided"
+            />
+            <label for="twosided">&nbsp;Двусторонняя печать</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary">Отправить</button>
+      <button type="submit" class="btn btn-success btn-lg">Отправить</button>
+      <router-link class="btn btn-primary btn-lg" to="/history">
+        История печати
+      </router-link>
     </div>
   </form>
 </template>
@@ -54,7 +117,6 @@
 <script>
 import axios from "axios";
 
-const API_ROOT = "https://printer.api.profcomff.com";
 
 export default {
   data() {
@@ -62,6 +124,11 @@ export default {
       surname: undefined,
       number: undefined,
       file: undefined,
+
+      copies: 1,
+      pages: "",
+      twosided: false,
+
       api_pin: undefined,
       status: "PENDING",
     };
@@ -76,17 +143,13 @@ export default {
   },
   watch: {
     surname(new_surname) {
-      localStorage.surname = new_surname;
+      localStorage.setItem("surname", new_surname);
     },
     number(new_number) {
-      localStorage.number = new_number;
+      localStorage.setItem("number", new_number);
     },
   },
   methods: {
-    file_on_change(event) {
-      this.file = event.target.files[0];
-    },
-
     async send() {
       console.log("Start send routine");
       this.status = "PROGRESS";
@@ -108,7 +171,7 @@ export default {
           }
         }
       } finally {
-        this.$emit("uploaded", this.status, this.api_pin);
+        this.$emit("uploaded", this.status, this.api_pin, this.file.name);
         console.log("Finished!");
       }
     },
@@ -117,11 +180,16 @@ export default {
       console.log("Request to API");
 
       var response = await axios.post(
-        `${API_ROOT}/file`,
+        `${process.env.VUE_APP_API_PRINTER}/file`,
         {
           surname: this.surname.trim(),
           number: this.number.trim(),
           filename: this.file.name,
+          options: {
+            pages: this.pages,
+            copies: this.copies,
+            two_sided: this.twosided,
+          },
         },
         {
           headers: { "Content-Type": "application/json" },
@@ -138,7 +206,7 @@ export default {
       var body_data = new FormData();
       body_data.append("file", this.file);
 
-      await axios.post(`${API_ROOT}/file/${this.api_pin}`, body_data);
+      await axios.post(`${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`, body_data);
     },
   },
 };
