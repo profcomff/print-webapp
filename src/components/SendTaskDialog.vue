@@ -73,7 +73,7 @@
               name="copies"
               min="1"
               max="10"
-              v-model="copies"
+              v-model.lazy="copies"
               required
             />
           </div>
@@ -146,6 +146,9 @@ export default {
     },
     number(new_number) {
       localStorage.setItem("number", new_number);
+    },
+    copies(new_copies) {
+      this.copies = parseInt(new_copies);
     },
   },
   methods: {
