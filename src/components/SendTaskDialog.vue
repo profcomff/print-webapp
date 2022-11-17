@@ -117,7 +117,6 @@
 <script>
 import axios from "axios";
 
-
 export default {
   data() {
     return {
@@ -206,7 +205,10 @@ export default {
       var body_data = new FormData();
       body_data.append("file", this.file);
 
-      await axios.post(`${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`, body_data);
+      await axios.post(
+        `${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`,
+        body_data
+      );
     },
   },
 };
