@@ -73,7 +73,7 @@
               name="copies"
               min="1"
               max="10"
-              v-model="copies"
+              v-model.lazy="copies"
               required
             />
           </div>
@@ -117,7 +117,6 @@
 <script>
 import axios from "axios";
 
-
 export default {
   data() {
     return {
@@ -147,6 +146,9 @@ export default {
     },
     number(new_number) {
       localStorage.setItem("number", new_number);
+    },
+    copies(new_copies) {
+      this.copies = parseInt(new_copies);
     },
   },
   methods: {
@@ -206,7 +208,10 @@ export default {
       var body_data = new FormData();
       body_data.append("file", this.file);
 
-      await axios.post(`${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`, body_data);
+      await axios.post(
+        `${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`,
+        body_data
+      );
     },
   },
 };

@@ -30,7 +30,7 @@ export default defineComponent({
   mounted() {
     this.hist = get_history();
     this.hist.reverse();
-    log_open_history()
+    log_open_history();
   },
 });
 </script>
