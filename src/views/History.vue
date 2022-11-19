@@ -31,6 +31,14 @@ export default defineComponent({
     this.hist = get_history();
     this.hist.reverse();
     log_open_history();
+    document.dispatchEvent(
+      new CustomEvent("change-header-layout", {
+        detail: {
+          layoutName: "back",
+          text: "История печати",
+        },
+      })
+    );
   },
 });
 </script>

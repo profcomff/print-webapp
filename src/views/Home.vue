@@ -56,6 +56,14 @@ export default defineComponent({
   },
   mounted() {
     log_open_app();
+    document.dispatchEvent(
+      new CustomEvent("change-header-layout", {
+        detail: {
+          layoutName: "back",
+          text: "Бесплатный принтер",
+        },
+      })
+    );
   },
 });
 </script>
