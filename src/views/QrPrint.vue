@@ -44,11 +44,11 @@
     <div class="form-actions">
       <div v-if="qrPrintStatus === 'pending'">
         <span class="pending material-icons"> pending </span>
-        <span class="pending">Выполняю</span>
+        <span class="pending"><b>Выполняю</b></span>
       </div>
       <div v-if="qrPrintStatus === 'success'">
         <span class="success material-icons"> thumb_up </span>
-        <span class="success">Готово!</span>
+        <span class="success"><b>Готово!</b></span>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную
         </router-link>
@@ -58,7 +58,7 @@
       </div>
       <div v-if="qrPrintStatus === 'error'">
         <span class="error material-icons"> thumb_down </span>
-        <span class="error">Не вышло!</span>
+        <span class="error"><b>Не вышло!</b></span>
         <p>{{ qrPrintErrorMsg }}</p>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную

@@ -68,6 +68,12 @@ export default defineComponent({
 });
 </script>
 
+<style scoped>
+h1 {
+  margin: 16px 0;
+}
+</style>
+
 <style>
 p,
 .form-group,

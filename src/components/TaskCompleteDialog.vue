@@ -1,26 +1,38 @@
 <template>
   <div class="dialog-container">
     <div v-if="status === 'OK'">
-      <p class="h5">Успех! Код для печати:</p>
-      <p class="h1">{{ pin }}</p>
+      <span class="success material-icons"> thumb_up </span>
+      <span class="success"><b>Готово!</b></span>
+      <span class="success">
+        Код для печати:<br />
+        <b>{{ pin }}</b>
+      </span>
     </div>
     <div v-else-if="status == 403">
-      <p class="h5">Не вышло =(</p>
-      <p class="h3">
+      <span class="error material-icons"> thumb_down </span>
+      <span class="error"><b>Не вышло!</b></span>
+      <span class="error small">
         Проверьте правильность ввода фамилии и номера профсоюзного билета
-      </p>
+      </span>
     </div>
     <div v-else-if="status == 415">
-      <p class="h5">Не вышло =(</p>
-      <p class="h3">Отправлять можно только файлы PDF</p>
+      <span class="error material-icons"> thumb_down </span>
+      <span class="error"><b>Не вышло!</b></span>
+      <span class="error small"> Отправлять можно только файлы PDF </span>
     </div>
     <div v-else-if="status == 422">
-      <p class="h5">Не вышло =(</p>
-      <p class="h3">Проверьте параметры печати и попробуйте снова</p>
+      <span class="error material-icons"> thumb_down </span>
+      <span class="error"><b>Не вышло!</b></span>
+      <span class="error small">
+        Проверьте параметры печати и попробуйте снова
+      </span>
     </div>
     <div v-else>
-      <p class="h5">Не вышло =(</p>
-      <p class="h3">Мы не знаем почему, но попробуйте обновить страницу</p>
+      <span class="error material-icons"> thumb_down </span>
+      <span class="error"><b>Не вышло!</b></span>
+      <span class="error small">
+        Мы не знаем почему, но попробуйте обновить страницу
+      </span>
       <sup>
         Если не помогло -
         <a :href="feedback_url" target="_blank">напишите нам</a>
@@ -70,3 +82,36 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
+span.success {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-success);
+  text-align: center;
+  margin: 0 auto;
+}
+span.error {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-danger);
+  text-align: center;
+}
+span.error.small {
+  display: block;
+  font-size: 20px;
+  width: 100%;
+  color: var(--bs-black);
+  text-align: center;
+}
+span.pending {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-dark);
+  text-align: center;
+}
+</style>
