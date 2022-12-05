@@ -71,12 +71,18 @@ export default defineComponent({
   justify-content: space-between;
   margin: 20px;
   font-size: 1.5rem;
+  gap: 8px;
 }
 .hist-item > * {
   display: block;
 }
 .hist-item > small {
   font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 0 1 100%;
+  white-space: nowrap;
 }
 
 .material-icons {
