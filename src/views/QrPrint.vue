@@ -10,7 +10,12 @@
       Для быстрой печати по QR подойдите к принтеру и отсканируйте код под
       кнопкой "Печать".
     </p>
-    <div v-if="qrInitSuccess === undefined">
+    <div v-if="!isMobile">
+      <p class="alert alert-success" role="alert">
+        Откройте эту страницу с смартфона или планшета
+      </p>
+    </div>
+    <div v-else-if="qrInitSuccess === undefined">
       <p class="alert alert-success" role="alert">
         Попытка подключиться к камере
       </p>
@@ -33,15 +38,17 @@
     <qrcode-stream
       @decode="onDecode"
       @init="onInit"
-      v-if="(qrInitSuccess !== false) & !qrPrintStatus"
+      v-if="isMobile & (qrInitSuccess !== false) & !qrPrintStatus"
     >
     </qrcode-stream>
     <div class="form-actions">
       <div v-if="qrPrintStatus === 'pending'">
-        <p>Обработка...</p>
+        <span class="pending material-icons"> pending </span>
+        <span class="pending"><b>Выполняю</b></span>
       </div>
       <div v-if="qrPrintStatus === 'success'">
-        <p>Готово!</p>
+        <span class="success material-icons"> thumb_up </span>
+        <span class="success"><b>Готово!</b></span>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную
         </router-link>
@@ -50,7 +57,8 @@
         </router-link>
       </div>
       <div v-if="qrPrintStatus === 'error'">
-        <p>Не вышло!</p>
+        <span class="error material-icons"> thumb_down </span>
+        <span class="error"><b>Не вышло!</b></span>
         <p>{{ qrPrintErrorMsg }}</p>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную
@@ -69,6 +77,7 @@
 <script>
 import { QrcodeStream } from "vue3-qrcode-reader";
 import { log_open_qr, log_print_qr, log_error_qr } from "@/utils/marketing";
+import { isMobile } from "@/utils/mobile";
 
 export default {
   data: () => ({
@@ -77,6 +86,11 @@ export default {
     qrPrintStatus: undefined,
     qrPrintErrorMsg: "",
   }),
+  computed: {
+    isMobile() {
+      return isMobile();
+    },
+  },
   components: {
     QrcodeStream,
   },
@@ -160,3 +174,29 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
+span.success {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-success);
+  text-align: center;
+  margin: 0 auto;
+}
+span.error {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-danger);
+  text-align: center;
+}
+span.pending {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-dark);
+  text-align: center;
+}
+</style>
