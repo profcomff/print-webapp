@@ -3,7 +3,9 @@
     <h1 class="accordion-header" id="histAccordion-headingOne">
       Печать по QR коду
     </h1>
-    <small><a href="#" @click.prevent="this.$router.go(-1)">← Вернуться</a></small>
+    <small
+      ><a href="#" @click.prevent="this.$router.go(-1)">← Вернуться</a></small
+    >
     <p>
       Для быстрой печати по QR подойдите к принтеру и отсканируйте код под
       кнопкой "Печать".
@@ -31,25 +33,99 @@
     <qrcode-stream
       @decode="onDecode"
       @init="onInit"
-      v-if="qrInitSuccess !== false"
+      v-if="(qrInitSuccess !== false) & !qrPrintStatus"
     >
     </qrcode-stream>
+    <div class="form-actions">
+      <div v-if="qrPrintStatus === 'pending'">
+        <p>Обработка...</p>
+      </div>
+      <div v-if="qrPrintStatus === 'success'">
+        <p>Готово!</p>
+        <router-link to="/" class="btn btn-lg btn-primary">
+          Вернуться на главную
+        </router-link>
+        <router-link to="/history" class="btn btn-lg btn-primary">
+          Перейти к истории
+        </router-link>
+      </div>
+      <div v-if="qrPrintStatus === 'error'">
+        <p>Не вышло!</p>
+        <p>{{ qrPrintErrorMsg }}</p>
+        <router-link to="/" class="btn btn-lg btn-primary">
+          Вернуться на главную
+        </router-link>
+        <router-link to="/history" class="btn btn-lg btn-primary">
+          Перейти к истории
+        </router-link>
+        <div class="btn btn-lg btn-success" @click="reset">
+          Попробовать еще раз
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { QrcodeStream } from "vue3-qrcode-reader";
+import { log_open_qr, log_print_qr, log_error_qr } from "@/utils/marketing";
 
 export default {
   data: () => ({
+    pins: [],
     qrInitSuccess: undefined,
+    qrPrintStatus: undefined,
+    qrPrintErrorMsg: "",
   }),
   components: {
     QrcodeStream,
   },
   methods: {
+    reset() {
+      this.qrInitSuccess = undefined;
+      this.qrPrintStatus = undefined;
+      this.qrPrintErrorMsg = "";
+    },
     onDecode(decodedString) {
       console.log(decodedString);
+      this.qrPrintStatus = "pending";
+
+      fetch(`${process.env.VUE_APP_API_PRINTER}/qr`, {
+        method: "POST",
+        cache: "no-cache",
+        redirect: "follow",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          qr_token: decodedString,
+          files: this.pins,
+        }),
+      })
+        .then((response) => response.json())
+        .then((response) => {
+          console.log(response);
+          if (response.status === "ok") {
+            this.qrPrintStatus = "success";
+            log_print_qr(this.pins);
+          } else if (response.detail === "Terminal not found by qr") {
+            this.qrPrintStatus = "error";
+            this.qrPrintErrorMsg = "QR код недействительный";
+            log_error_qr(this.pins, response);
+          } else if (response.detail === "Terminal not found by qr") {
+            this.qrPrintStatus = "error";
+            this.qrPrintErrorMsg = "QR код недействительный";
+            log_error_qr(this.pins, response);
+          } else {
+            this.qrPrintStatus = "error";
+            this.qrPrintErrorMsg = "Неизвестная ошибка";
+            log_error_qr(this.pins, response);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          this.qrPrintStatus = "error";
+          this.qrPrintErrorMsg = "Ошибка сети";
+          log_error_qr(this.pins, error);
+        });
     },
     async onInit(promise) {
       // show loading indicator
@@ -77,7 +153,10 @@ export default {
       }
     },
   },
+  mounted() {
+    const location = document.location.hash.replace(/^#?/, "");
+    this.pins = location.split(",");
+    log_open_qr();
+  },
 };
 </script>
-
-<style></style>
