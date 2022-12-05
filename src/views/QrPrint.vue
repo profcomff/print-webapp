@@ -10,7 +10,12 @@
       Для быстрой печати по QR подойдите к принтеру и отсканируйте код под
       кнопкой "Печать".
     </p>
-    <div v-if="qrInitSuccess === undefined">
+    <div v-if="!isMobile">
+      <p class="alert alert-success" role="alert">
+        Откройте эту страницу с смартфона или планшета
+      </p>
+    </div>
+    <div v-else-if="qrInitSuccess === undefined">
       <p class="alert alert-success" role="alert">
         Попытка подключиться к камере
       </p>
@@ -33,7 +38,7 @@
     <qrcode-stream
       @decode="onDecode"
       @init="onInit"
-      v-if="(qrInitSuccess !== false) & !qrPrintStatus"
+      v-if="isMobile & (qrInitSuccess !== false) & !qrPrintStatus"
     >
     </qrcode-stream>
     <div class="form-actions">
@@ -69,6 +74,7 @@
 <script>
 import { QrcodeStream } from "vue3-qrcode-reader";
 import { log_open_qr, log_print_qr, log_error_qr } from "@/utils/marketing";
+import { isMobile } from "@/utils/mobile";
 
 export default {
   data: () => ({
@@ -77,6 +83,11 @@ export default {
     qrPrintStatus: undefined,
     qrPrintErrorMsg: "",
   }),
+  computed: {
+    isMobile() {
+      return isMobile();
+    },
+  },
   components: {
     QrcodeStream,
   },
