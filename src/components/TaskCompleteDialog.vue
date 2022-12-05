@@ -26,6 +26,14 @@
       </sup>
     </div>
     <div class="form-actions">
+      <router-link
+        class="btn btn-success btn-lg"
+        type="button"
+        :to="`/qr#${pin}`"
+        v-if="isMobile"
+      >
+        Распечатать по QR
+      </router-link>
       <button
         class="btn btn-primary btn-lg"
         type="button"
@@ -38,7 +46,14 @@
 </template>
 
 <script>
+import { isMobile } from "@/utils/mobile";
+
 export default {
+  computed: {
+    isMobile() {
+      return isMobile();
+    },
+  },
   props: {
     status: {
       type: String,

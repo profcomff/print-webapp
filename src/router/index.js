@@ -13,6 +13,11 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "history" */ "@/views/History.vue"),
   },
+  {
+    path: "/qr",
+    name: "QR Print",
+    component: () => import(/* webpackChunkName: "qr" */ "@/views/QrPrint.vue"),
+  },
 ];
 
 const router = createRouter({

@@ -76,7 +76,7 @@ p,
   margin: 20px auto;
 }
 
-.form-actions > .btn {
+.form-actions .btn {
   width: 100%;
   margin: 10px auto;
 }
