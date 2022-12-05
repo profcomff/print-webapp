@@ -43,10 +43,12 @@
     </qrcode-stream>
     <div class="form-actions">
       <div v-if="qrPrintStatus === 'pending'">
-        <p>Обработка...</p>
+        <span class="pending material-icons"> pending </span>
+        <span class="pending">Выполняю</span>
       </div>
       <div v-if="qrPrintStatus === 'success'">
-        <p>Готово!</p>
+        <span class="success material-icons"> thumb_up </span>
+        <span class="success">Готово!</span>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную
         </router-link>
@@ -55,7 +57,8 @@
         </router-link>
       </div>
       <div v-if="qrPrintStatus === 'error'">
-        <p>Не вышло!</p>
+        <span class="error material-icons"> thumb_down </span>
+        <span class="error">Не вышло!</span>
         <p>{{ qrPrintErrorMsg }}</p>
         <router-link to="/" class="btn btn-lg btn-primary">
           Вернуться на главную
@@ -171,3 +174,29 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
+span.success {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-success);
+  text-align: center;
+  margin: 0 auto;
+}
+span.error {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-danger);
+  text-align: center;
+}
+span.pending {
+  display: block;
+  font-size: 32px;
+  width: 100%;
+  color: var(--bs-dark);
+  text-align: center;
+}
+</style>
