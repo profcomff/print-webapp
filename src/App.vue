@@ -4,7 +4,8 @@
 
     <div v-if="!this.$route.query.embeded">
       <small class="text-muted">
-        Сделано в <a href="https://dyakov.space/">dyakov.space</a>
+        Сделано в
+        <a href="https://dyakov.space/" target="_blank">dyakov.space</a>
       </small>
     </div>
   </div>

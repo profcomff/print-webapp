@@ -22,7 +22,8 @@
       <p class="h5">Не вышло =(</p>
       <p class="h3">Мы не знаем почему, но попробуйте обновить страницу</p>
       <sup>
-        Если не помогло - <a href="https://vk.me/profcomff">напишите нам</a>
+        Если не помогло -
+        <a :href="feedback_url" target="_blank">напишите нам</a>
       </sup>
     </div>
     <div class="form-actions">
@@ -52,6 +53,9 @@ export default {
   computed: {
     isMobile() {
       return isMobile();
+    },
+    feedback_url() {
+      return process.env.VUE_APP_FEEDBACK_FORM;
     },
   },
   props: {
