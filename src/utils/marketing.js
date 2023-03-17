@@ -1,10 +1,13 @@
 export function get_marketing_id() {
-  let marketing_id = localStorage.getItem("marketing-id");
-  if (marketing_id && marketing_id !== "null") return marketing_id;
-
+  // Если marketing id передали в URL, сохрани и используй его
   const urlParams = new URLSearchParams(window.location.search);
-  marketing_id = urlParams.get("marketing_id");
+  let marketing_id = urlParams.get("marketing_id");
   if (marketing_id) localStorage.setItem("marketing-id", marketing_id);
+
+  // Если marketing id не передали, возьми из local storage
+  marketing_id = localStorage.getItem("marketing-id");
+
+  // Иначе используй marketing id = null
   return marketing_id;
 }
 
