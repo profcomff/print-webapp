@@ -123,6 +123,7 @@ export default {
       surname: undefined,
       number: undefined,
       file: undefined,
+      source: "webapp",
 
       copies: 1,
       pages: "",
@@ -187,6 +188,7 @@ export default {
           surname: this.surname.trim(),
           number: this.number.trim(),
           filename: this.file.name,
+          source: this.source,
           options: {
             pages: this.pages,
             copies: this.copies,
