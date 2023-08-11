@@ -123,7 +123,6 @@ export default {
       surname: undefined,
       number: undefined,
       file: undefined,
-      source: "webapp",
 
       copies: 1,
       pages: "",
