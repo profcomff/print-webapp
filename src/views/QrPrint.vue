@@ -11,7 +11,7 @@
       кнопкой "Печать".
     </p>
     <div v-if="!isMobile">
-      <p class="alert alert-success" role="alert">
+      <p class="alert alert-warning" role="alert">
         Откройте эту страницу с смартфона или планшета
       </p>
     </div>
