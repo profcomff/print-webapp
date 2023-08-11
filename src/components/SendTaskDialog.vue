@@ -187,6 +187,7 @@ export default {
           surname: this.surname.trim(),
           number: this.number.trim(),
           filename: this.file.name,
+          source: "webapp",
           options: {
             pages: this.pages,
             copies: this.copies,
