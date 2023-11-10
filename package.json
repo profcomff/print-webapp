@@ -13,7 +13,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "^1.6.0",
     "core-js": "^3.6.5",
     "register-service-worker": "^1.7.1",
     "vue": "^3.0.0",
