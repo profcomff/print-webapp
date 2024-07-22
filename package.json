@@ -1,0 +1,45 @@
+{
+  "name": "print-ui-frontend",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "docker-build": "vue-tsc && vite build --base=/ui",
+    "preview": "vite preview",
+    "lint": "eslint --ext ts,vue src/ --fix",
+    "format": "prettier src/ --write",
+    "stylelint": "stylelint 'src/**/*.{vue,css}' --fix",
+    "check": "vue-tsc && pnpm run format && pnpm run lint && pnpm run stylelint",
+    "test": "echo ok"
+  },
+  "dependencies": {
+    "axios": "^1.6.5",
+    "pinia": "^2.1.7",
+    "query-string": "^8.1.0",
+    "vite-plugin-vuetify": "^2.0.3",
+    "vue": "^3.4.5",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.6.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.6.2",
+    "@vue/eslint-config-typescript": "^12.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.2",
+    "eslint-plugin-vue": "^9.19.2",
+    "postcss-preset-env": "^9.3.0",
+    "prettier": "^3.1.1",
+    "stylelint": "^15.11.0",
+    "stylelint-config-recommended": "^13.0.0",
+    "stylelint-config-recommended-vue": "^1.5.0",
+    "stylelint-config-standard": "^34.0.0",
+    "stylelint-use-nesting": "^4.1.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.3.4",
+    "vite-plugin-stylelint": "^5.3.1",
+    "vite-svg-loader": "^5.1.0",
+    "vue-tsc": "^2.0.26"
+  }
+}

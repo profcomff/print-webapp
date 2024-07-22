@@ -1,0 +1,8 @@
+extends:
+    - eslint:recommended
+    - plugin:vue/vue3-recommended
+    - '@vue/typescript'
+    - plugin:prettier/recommended
+rules:
+    no-duplicate-imports: error
+    prettier/prettier: warn

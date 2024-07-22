@@ -1,0 +1,75 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"extensions": {
+		"recommendations": [
+			"Vue.volar",
+			"dbaeumer.vscode-eslint",
+			"esbenp.prettier-vscode",
+			"formulahendry.auto-close-tag",
+			"formulahendry.auto-rename-tag",
+			"steoates.autoimport",
+			"vunguyentuan.vscode-css-variables",
+			"mohd-akram.vscode-html-format",
+		],
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Configure",
+				"type": "shell",
+				"command": "npm install",
+			},
+			{
+				"label": "Run local",
+				"type": "shell",
+				"command": "npm run dev",
+			},
+			{
+				"label": "Build",
+				"type": "shell",
+				"command": "npm run build",
+				"group": {
+					"kind": "build",
+					"isDefault": true,
+				},
+			},
+			{
+				"label": "Test",
+				"type": "shell",
+				"command": "npm run test",
+				"group": {
+					"kind": "test",
+					"isDefault": true,
+				},
+			},
+		],
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch dev",
+				"request": "launch",
+				"runtimeArgs": ["dev"],
+				"runtimeExecutable": "pnpm",
+				"skipFiles": ["<node_internals>/**"],
+				"type": "node",
+				"serverReadyAction": {
+					"pattern": "Local:   http://localhost:([0-9]+)/",
+					"uriFormat": "http://localhost:%s",
+					"action": "openExternally",
+				},
+			},
+		],
+	},
+	"settings": {
+		"typescript.tsdk": "node_modules/typescript/lib",
+		"css.validate": false,
+		"git.openRepositoryInParentFolders": "always",
+	},
+}
