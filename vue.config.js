@@ -1,4 +1,5 @@
 module.exports = {
+  transpileDependencies: ['vue-router'],
   pwa: {
     name: 'Бесплатный принтер физфака',
     themeColor: '#558ab2',
