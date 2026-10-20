@@ -38,9 +38,7 @@
         required
       />
       <small id="fileHelp" class="form-text text-muted">
-        <i>
-          Принимаем только PDF до 25 МБ, максимум 50 страниц на печать.
-        </i>
+        <i> Принимаем только PDF до 25 МБ, максимум 50 страниц на печать. </i>
       </small>
     </div>
 
@@ -91,6 +89,7 @@
             </small>
           </div>
 
+          <!--
           <div class="form-group">
             <input
               class="form-check-input"
@@ -100,6 +99,7 @@
             />
             <label for="twosided">&nbsp;Двусторонняя печать</label>
           </div>
+          -->
         </div>
       </div>
     </div>
@@ -125,7 +125,7 @@ export default {
 
       copies: 1,
       pages: "",
-      twosided: false,
+      // twosided: false,
 
       api_pin: undefined,
       status: "PENDING",
@@ -190,7 +190,7 @@ export default {
           options: {
             pages: this.pages,
             copies: this.copies,
-            two_sided: this.twosided,
+            // two_sided: this.twosided,
           },
         },
         {
