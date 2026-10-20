@@ -1,10 +1,10 @@
 module.exports = {
-  transpileDependencies: ['vue-router'],
+  transpileDependencies: ["vue-router"],
   pwa: {
-    name: 'Бесплатный принтер физфака',
-    themeColor: '#558ab2',
-    msTileColor: '#558ab2',
-    appleMobileWebAppCapable: 'yes',
-    appleMobileWebAppStatusBarStyle: '#558ab2',
-  }
-}
+    name: "Бесплатный принтер физфака",
+    themeColor: "#558ab2",
+    msTileColor: "#558ab2",
+    appleMobileWebAppCapable: "yes",
+    appleMobileWebAppStatusBarStyle: "#558ab2",
+  },
+};

@@ -38,9 +38,7 @@
         required
       />
       <small id="fileHelp" class="form-text text-muted">
-        <i>
-          Принимаем только PDF до 25 МБ, максимум 50 страниц на печать.
-        </i>
+        <i> Принимаем только PDF до 25 МБ, максимум 50 страниц на печать. </i>
       </small>
     </div>
 
