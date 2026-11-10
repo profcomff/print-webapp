@@ -138,6 +138,9 @@ export default {
     if (localStorage.number) {
       this.number = localStorage.number;
     }
+     if (!this.surname || !this.number) {
+      await this.tryFillFromApi();
+    }
   },
   watch: {
     surname(new_surname) {
@@ -212,6 +215,99 @@ export default {
         `${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`,
         body_data
       );
+    },
+    
+    async tryFillFromUserdataApi() {
+      const userdataBase =
+        process.env.VUE_APP_API_USERDATA;
+
+      const userId = localStorage.user_id || "me";
+      const url = `${userdataBase}/user/${userId}`;
+
+      const headers = {};
+      if (localStorage.api_token) {
+        headers["Authorization"] = `Bearer ${localStorage.api_token}`;
+      }
+
+      try {
+        const resp = await axios.get(url, {
+          headers,
+          withCredentials: true,
+          timeout: 7000,
+        });
+
+        const items = resp.data && resp.data.items ? resp.data.items : [];
+        if (!Array.isArray(items)) {
+          console.log("userdata API вернул не тот формат (items не массив)", resp.data);
+          return false;
+        }
+
+        const norm = (s) =>
+          (s || "")
+            .toString()
+            .normalize("NFKC")
+            .trim()
+            .toLowerCase();
+
+        // Найдём элемент с Полное имя (личная информация)
+        const nameItem =
+          items.find(
+            (i) =>
+              i &&
+              (norm(i.param).includes("полное имя") ||
+                norm(i.param).includes("full name") ||
+                (i.category && norm(i.category).includes("личн") && norm(i.param).includes("имя")))
+          ) || null;
+
+        // Найдём элемент с номером профсоюзного билета
+        const ticketItem =
+          items.find(
+            (i) =>
+              i &&
+              (norm(i.param).includes("профсоюз") ||
+                norm(i.param).includes("профсоюзного") ||
+                norm(i.param).includes("номер проф") ||
+                norm(i.param).includes("номер профсоюзного") ||
+                (i.category && norm(i.category).includes("учёт") && norm(i.param).includes("номер")))
+          ) || null;
+
+        // Парсим фамилию из полного имени
+        if (nameItem && nameItem.value) {
+          const full = nameItem.value.toString().trim();
+          if (full.length > 0) {
+            const parts = full.split(/\s+/);
+            const extractedSurname = parts[parts.length - 1];
+            if (!this.surname && extractedSurname) {
+              this.surname = extractedSurname;
+              localStorage.setItem("surname", this.surname);
+            }
+          }
+        } else {
+          console.log("Не найден элемент с полным именем в userdata response");
+        }
+
+        if (ticketItem && ticketItem.value) {
+          const ticket = ticketItem.value.toString().trim();
+          if (!this.number && ticket.length > 0) {
+            this.number = ticket;
+            localStorage.setItem("number", this.number);
+          }
+        } else {
+          console.log("Не найден элемент с номером профсоюзного билета в userdata response");
+        }
+
+        console.log("Попытка заполнения из userdata API завершена", {
+          surname: this.surname,
+          number: this.number,
+          url,
+        });
+
+        return true;
+      } catch (err) {
+        const code = err && err.response ? err.response.status : null;
+        console.log(`Ошибка запроса userdata API ${url}`, code || err.message);
+        return false;
+      }
     },
   },
 };
