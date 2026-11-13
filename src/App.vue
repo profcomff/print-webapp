@@ -23,8 +23,12 @@ watch(
   <main class="app-shell">
     <router-view />
     <footer>
-      Сделано в
-      <a href="https://dyakov.space/" target="_blank" rel="noopener noreferrer">dyakov.space</a>
+      Бесплатная печать для членов профсоюза
+      <span>PDF · чёрно-белая печать</span>
+      <div>
+        Сделано в
+        <a href="https://dyakov.space/" target="_blank" rel="noopener noreferrer">dyakov.space</a>
+      </div>
     </footer>
     <nav class="bottom-nav" aria-label="Разделы печати">
       <router-link
