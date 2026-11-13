@@ -21,6 +21,7 @@ module.exports = {
   },
   transpileDependencies: ["vue-router"],
   pwa: {
+    manifestCrossorigin: "use-credentials",
     workboxOptions: { exclude: [/\.map$/, /camera\..*\.js$/, /\.wasm$/] },
     name: "Бесплатный принтер физфака",
     themeColor: "#558ab2",
