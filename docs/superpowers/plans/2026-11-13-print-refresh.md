@@ -20,10 +20,19 @@
 - Network/HTTP failures must preserve form values and distinguish uncertain print outcomes.
 
 ## Tasks
-- [ ] Toolchain: pnpm lock, Node 24 Docker builder, compatible latest Vue CLI, strict TS, ESLint, typecheck. Preserve existing build interfaces.
-- [ ] Typed API/storage/validation with runnable tests first: PDF/page validation, status errors, storage corruption, upload sequence, QR HTTP and deduplication.
-- [ ] Responsive form/result/history: local CSS, progress, inline errors, accessible controls, clipboard PIN, query preservation.
-- [ ] Mobile QR: explicit camera launch, rear camera, useful permission errors, stop on detect/leave, no automatic print retries, mobile history selection (up to 10).
-- [ ] Verification: tests, lint, typecheck, development/production builds, mocked browser checks at phone/desktop sizes including embedded query, update README.
+- [x] Toolchain: pnpm lock, Node 24 Docker builder, compatible latest Vue CLI, strict TS, ESLint, typecheck. Preserve existing build interfaces.
+- [x] Typed API/storage/validation with runnable tests first: PDF/page validation, status errors, storage corruption, upload sequence, QR HTTP and deduplication.
+- [x] Responsive form/result/history: local CSS, progress, inline errors, accessible controls, clipboard PIN, query preservation.
+- [x] Mobile QR: explicit camera launch, rear camera, useful permission errors, stop on detect/leave, no automatic print retries, mobile history selection (up to 10).
+- [x] Verification: tests, lint, typecheck, development/production builds, mocked browser checks at phone/desktop sizes including embedded query, update README.
 
 User delegated implementation choices and requested TypeScript and pnpm. Execute inline in the existing checkout; no worktree, publish, push or deployment is needed.
+
+## Verification and review
+
+- 13 unit checks pass; strict vue-tsc and ESLint pass.
+- 19 browser checks pass; one mobile-only case is intentionally skipped on desktop.
+- Development and production builds pass; verify:build confirms hashed app entrypoint and no QR prefetch in both modes.
+- Fresh reviewer found upload navigation loss and delayed autofill overwriting cleared input. Both reproduced by failing browser checks and fixed. QR pending navigation and actual camera track shutdown are also covered.
+- Docker itself is unavailable in this environment; image execution and physical iOS/Android camera permissions still need testing in the deployment environment. No production print calls, push or deployment performed.
+- Implementation choice: preserve Vue CLI 5 and use TypeScript 6 (latest supported by installed TypeScript ESLint). The scanner's local WASM is pinned to 1.1.3 to match the engine bundled in vue-qrcode-reader 5.7.3.

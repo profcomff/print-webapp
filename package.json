@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "typecheck": "vue-tsc --noEmit",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "verify:build": "node scripts/verify-build.mjs"
   },
   "main": "index.js",
   "dependencies": {

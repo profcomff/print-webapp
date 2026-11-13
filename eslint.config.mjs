@@ -22,7 +22,7 @@ export default ts.config(
   },
   {
     files: ["*.js"],
-    languageOptions: { globals: { module: "readonly" } },
+    languageOptions: { globals: { module: "readonly", require: "readonly" } },
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 );
