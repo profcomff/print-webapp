@@ -36,7 +36,9 @@ docker build --build-arg BUILD_MODE=production -t print-ui .
 docker run --rm -p 8080:80 print-ui
 ```
 
-Builder обновлён до Node 24, runtime — до nginx stable. Пакеты устанавливаются через pnpm с замороженным lockfile. В обоих режимах сборки entrypoint имеет хеш в имени, как ожидает существующий nginx redirect; `pnpm verify:build` проверяет этот контракт на готовом `dist`. `default.conf`, `docker_entrypoint.sh`, сеть `web`, имена контейнеров, балансировка и существующий deployment workflow не менялись.
+Builder обновлён до Node 24, runtime — до nginx stable. Пакеты устанавливаются через pnpm с замороженным lockfile. В обоих режимах сборки entrypoint имеет хеш в имени, как ожидает существующий nginx redirect; `pnpm verify:build` проверяет этот контракт на готовом `dist`. `default.conf`, `docker_entrypoint.sh`, сеть `web`, имена контейнеров, балансировка и параметры запуска контейнеров не менялись.
+
+CI собирает и раскатывает тестовый образ при пуше в `main` или пуше тега `test/*` (например, `test/print-refresh`). Теги `v*` также запускают production-сборку и раскатку. Тестовый стенд: https://printer.ui.test.profcomff.com/.
 
 Vue CLI остаётся на последнем опубликованном выпуске 5.0.9, поскольку менять схему сборки нельзя. TypeScript 6.0 — последний выпуск, поддерживаемый текущим TypeScript ESLint; Vue Router обновлён до 5.5. Удалено пустое Vuex-хранилище. CSS, иконки и шрифты не требуют внешних CDN. Модуль камеры загружается только при её включении; совместимый с QR-библиотекой WASM `zxing-wasm@1.1.3` собирается локально и исключён из предварительного PWA-кеширования.
 
