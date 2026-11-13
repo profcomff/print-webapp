@@ -80,68 +80,43 @@ a {
 .app-shell {
   max-width: 620px;
   margin: 0 auto;
-  padding: 36px 22px 24px;
+  padding: 24px 22px calc(88px + env(safe-area-inset-bottom, 0px));
 }
-.app-shell.is-embedded {
-  padding-top: 14px;
-}
-.brand {
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: min(100%, 620px);
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 30px;
+  gap: 8px;
+  padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 16px 16px 0 0;
+  background: #fff;
+  box-shadow: 0 -4px 18px #26344c08;
 }
-.brand strong {
-  font-size: 18px;
-  display: block;
-  letter-spacing: -0.4px;
-}
-.brand span:not(.brand-icon) {
-  display: block;
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: 3px;
-}
-.brand-icon {
-  width: 45px;
-  height: 45px;
-  border-radius: 14px;
-  background: var(--accent);
-  color: #fff;
-  display: grid;
-  place-items: center;
-}
-.brand-icon svg {
-  width: 25px;
-  height: 25px;
-}
-.tabs {
-  display: flex;
-  gap: 4px;
-  background: #e9edf3;
-  padding: 4px;
-  border-radius: 13px;
-  margin-bottom: 30px;
-}
-.tabs a {
+.bottom-nav a {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   flex: 1;
   text-decoration: none;
-  padding: 11px 8px;
+  min-height: 48px;
+  padding: 12px 8px;
   border-radius: 9px;
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
 }
-.tabs a.active {
-  background: #fff;
-  box-shadow: 0 2px 5px #25355309;
+.bottom-nav a.active {
+  background: var(--soft);
   color: var(--accent);
 }
-.tabs svg {
+.bottom-nav svg {
   width: 18px;
   height: 18px;
 }
@@ -579,7 +554,7 @@ input[type="checkbox"] {
 }
 .selection-bar {
   position: sticky;
-  bottom: 12px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -710,16 +685,10 @@ input[type="checkbox"] {
 }
 @media (max-width: 440px) {
   .app-shell {
-    padding: 22px 14px;
+    padding: 20px 14px calc(88px + env(safe-area-inset-bottom, 0px));
   }
   .card {
     padding: 20px;
-  }
-  .brand {
-    margin-bottom: 24px;
-  }
-  .tabs {
-    margin-bottom: 24px;
   }
   .fields-grid {
     grid-template-columns: 1fr;
