@@ -3,6 +3,9 @@ const process = require("node:process");
 module.exports = {
   devServer: {
     allowedHosts: [".coder.dyakov.space"],
+    client: {
+      webSocketURL: "auto://0.0.0.0:0/ws",
+    },
   },
   chainWebpack(config) {
     // Both BUILD_MODE values must satisfy the existing nginx app.js redirect.
