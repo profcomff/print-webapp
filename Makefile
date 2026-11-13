@@ -1,2 +1,2 @@
 run:
-	yarn start
+	pnpm start

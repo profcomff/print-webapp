@@ -1,218 +1,215 @@
+<script setup lang="ts">
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
+import { profileSession, loadPrintProfile } from "@/api/profile";
+import AppIcon from "./AppIcon.vue";
+import { readStorage, writeStorage } from "@/utils/history";
+import { validateFile, validatePages } from "@/utils/printing";
+import { uploadFile, errorMessage } from "@/api/printer";
+import { log_print } from "@/utils/marketing";
+const emit = defineEmits<{ uploaded: [pin: string, filename: string] }>();
+const session = profileSession(window.location.search);
+const surname = ref(session ? "" : readStorage("surname"));
+const number = ref(session ? "" : readStorage("number"));
+const file = ref<File>();
+const copies = ref(1);
+const pages = ref("");
+const busy = ref(false);
+const progress = ref(0);
+const error = ref("");
+const dragging = ref(false);
+const surnameEdited = ref(false);
+const numberEdited = ref(false);
+onBeforeRouteLeave(() => !busy.value);
+function beforeUnload(event: BeforeUnloadEvent) {
+  if (busy.value) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+}
+onBeforeUnmount(() => window.removeEventListener("beforeunload", beforeUnload));
+onMounted(async () => {
+  window.addEventListener("beforeunload", beforeUnload);
+  if (!session) return;
+  try {
+    const identity = await loadPrintProfile(session);
+    if (!busy.value) {
+      if (identity.surname && !surnameEdited.value)
+        surname.value = identity.surname;
+      if (identity.number && !numberEdited.value)
+        number.value = identity.number;
+    }
+  } catch {
+    /* Missing or unavailable profile data leaves manual entry available. */
+  }
+});
+const fileSize = computed(() =>
+  file.value
+    ? `${(file.value.size / 1_000_000).toLocaleString("ru-RU", { maximumFractionDigits: 2 })} МБ`
+    : "",
+);
+function selectFile(value?: File) {
+  file.value = value;
+  error.value = "";
+}
+function onFile(event: Event) {
+  selectFile((event.target as HTMLInputElement).files?.[0]);
+}
+function drop(event: DragEvent) {
+  dragging.value = false;
+  if (!busy.value) selectFile(event.dataTransfer?.files[0]);
+}
+async function send() {
+  if (busy.value) return;
+  error.value = "";
+  if (!file.value) {
+    error.value = "Выберите PDF для печати.";
+    return;
+  }
+  if (!surname.value.trim() || !number.value.trim()) {
+    error.value = "Укажите фамилию и номер профсоюзного билета.";
+    return;
+  }
+  if (
+    !Number.isInteger(copies.value) ||
+    copies.value < 1 ||
+    copies.value > 10
+  ) {
+    error.value = "Можно заказать от 1 до 10 копий.";
+    return;
+  }
+  error.value = validatePages(pages.value);
+  if (error.value) return;
+  busy.value = true;
+  progress.value = 0;
+  try {
+    error.value = await validateFile(file.value);
+    if (error.value) return;
+    writeStorage("surname", surname.value.trim());
+    writeStorage("number", number.value.trim());
+    const pin = await uploadFile(
+      {
+        surname: surname.value,
+        number: number.value,
+        file: file.value,
+        copies: copies.value,
+        pages: pages.value,
+      },
+      (percent) => {
+        progress.value = percent;
+      },
+    );
+    emit("uploaded", pin, file.value.name);
+  } catch (cause) {
+    error.value = errorMessage(cause);
+    log_print("FAIL");
+  } finally {
+    busy.value = false;
+  }
+}
+</script>
 <template>
-  <form class="dialog-container" @submit.prevent @submit="send">
-    <div class="form-group">
-      <label for="surname">Фамилия:</label>
-      <input
-        class="form-control"
-        type="text"
-        name="surname"
-        placeholder="Иванов"
-        v-model="surname"
-        required
-      />
-    </div>
-
-    <div class="form-group">
-      <label for="number">Номер профсоюзного билета:</label>
-      <input
-        class="form-control"
-        type="text"
-        name="number"
-        placeholder="1012000"
-        v-model="number"
-        required
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label" for="file"
-        >Файл для печати в формате PDF:</label
+  <form class="card upload-form" :aria-busy="busy" @submit.prevent="send">
+    <fieldset :disabled="busy">
+      <label
+        class="drop-zone"
+        :class="{ 'is-dragging': dragging, 'has-file': file }"
+        @dragover.prevent="dragging = true"
+        @dragleave.prevent="dragging = false"
+        @drop.prevent="drop"
       >
-      <input
-        class="form-control"
-        id="file"
-        type="file"
-        accept="application/pdf"
-        @input="(event) => (file = event.target.files[0])"
-        aria-describedby="fileHelp"
-        required
-      />
-      <small id="fileHelp" class="form-text text-muted">
-        <i> Принимаем только PDF до 25 МБ, максимум 50 страниц на печать. </i>
-      </small>
-    </div>
-
-    <div class="accordion accordion-flush" id="accordionFlush">
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="flush-headingOne">
-          <button
-            class="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#flush-collapseOne"
-            aria-expanded="false"
-            aria-controls="flush-collapseOne"
-          >
-            Больше настроек
-          </button>
-        </h2>
-        <div
-          id="flush-collapseOne"
-          class="accordion-collapse collapse"
-          aria-labelledby="flush-headingOne"
-          data-bs-parent="#accordionFlush"
-        >
-          <div class="form-group">
-            <label for="copies">Количество копий:</label>
-            <input
-              class="form-control"
+        <input
+          id="file"
+          class="file-input"
+          type="file"
+          accept="application/pdf,.pdf"
+          aria-describedby="file-help"
+          @change="onFile"
+        />
+        <span class="file-symbol"
+          ><AppIcon :name="file ? 'file' : 'upload'"
+        /></span>
+        <strong>{{ file ? file.name : "Выберите PDF-файл" }}</strong>
+        <span>{{
+          file
+            ? `${fileSize} · Нажмите, чтобы заменить`
+            : "или перетащите его сюда"
+        }}</span>
+        <small id="file-help">До 25 МБ · до 50 страниц на печать</small>
+      </label>
+      <div class="section-label">
+        <span>Данные для печати</span><small>Как в профсоюзном билете</small>
+      </div>
+      <div class="fields-grid">
+        <div class="field">
+          <label for="surname">Фамилия</label
+          ><input
+            id="surname"
+            v-model="surname"
+            name="surname"
+            autocomplete="family-name"
+            placeholder="Иванов"
+            required
+            maxlength="100"
+            @input="surnameEdited = true"
+          />
+        </div>
+        <div class="field">
+          <label for="number">Номер профсоюзного билета</label
+          ><input
+            id="number"
+            v-model="number"
+            name="number"
+            inputmode="numeric"
+            placeholder="1012000"
+            required
+            maxlength="50"
+            @input="numberEdited = true"
+          />
+        </div>
+      </div>
+      <details class="print-settings">
+        <summary>
+          Настройки печати
+          <span>{{ copies }} коп. · {{ pages || "Все страницы" }}</span>
+        </summary>
+        <div class="fields-grid settings-fields">
+          <div class="field">
+            <label for="copies">Количество копий</label
+            ><input
+              id="copies"
+              v-model.number="copies"
               type="number"
-              name="copies"
               min="1"
               max="10"
-              v-model.lazy="copies"
               required
             />
           </div>
-
-          <div class="form-group">
-            <label for="pages">Номера страниц:</label>
-            <input
-              class="form-control"
-              type="text"
-              name="pages"
-              placeholder="Все"
+          <div class="field">
+            <label for="pages">Страницы</label
+            ><input
+              id="pages"
               v-model="pages"
-            />
-            <small id="pagesHelp" class="form-text text-muted">
-              <i>Формат: 1-2, 4</i>
-            </small>
+              placeholder="Все"
+              aria-describedby="pages-help"
+            /><small id="pages-help">Например: 1-3, 5</small>
           </div>
-
-          <!--
-          <div class="form-group">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              name="twosided"
-              v-model="twosided"
-            />
-            <label for="twosided">&nbsp;Двусторонняя печать</label>
-          </div>
-          -->
         </div>
-      </div>
+      </details>
+    </fieldset>
+    <div v-if="error" class="notice error" role="alert">{{ error }}</div>
+    <div v-if="busy" class="upload-progress" role="status">
+      <span>{{
+        progress ? `Загружаем файл · ${progress}%` : "Подготавливаем файл…"
+      }}</span><progress
+        :value="progress"
+        max="100"
+        aria-label="Загрузка файла"
+      /><small>Дождитесь PIN-кода, прежде чем закрывать страницу.</small>
     </div>
-
-    <div class="form-actions">
-      <button type="submit" class="btn btn-success btn-lg">Отправить</button>
-      <router-link class="btn btn-primary btn-lg" to="/history">
-        История печати
-      </router-link>
-    </div>
+    <button class="button primary full" type="submit" :disabled="busy">
+      <AppIcon name="print" />{{ busy ? "Загружаем…" : "Загрузить для печати" }}
+    </button>
+    <p class="form-note">Печать начнётся у принтера — по PIN-коду или QR.</p>
   </form>
 </template>
-
-<script>
-import axios from "axios";
-
-export default {
-  data() {
-    return {
-      surname: undefined,
-      number: undefined,
-      file: undefined,
-
-      copies: 1,
-      pages: "",
-      // twosided: false,
-
-      api_pin: undefined,
-      status: "PENDING",
-    };
-  },
-  mounted() {
-    if (localStorage.surname) {
-      this.surname = localStorage.surname;
-    }
-    if (localStorage.number) {
-      this.number = localStorage.number;
-    }
-  },
-  watch: {
-    surname(new_surname) {
-      localStorage.setItem("surname", new_surname);
-    },
-    number(new_number) {
-      localStorage.setItem("number", new_number);
-    },
-    copies(new_copies) {
-      this.copies = parseInt(new_copies);
-    },
-  },
-  methods: {
-    async send() {
-      console.log("Start send routine");
-      this.status = "PROGRESS";
-
-      try {
-        await this.request();
-        await this.upload();
-        this.status = "OK";
-      } catch (error) {
-        console.error(`Произошла ошибка: ${error}`);
-        var code = undefined;
-        try {
-          code = error.response.status;
-        } finally {
-          if (code === undefined) {
-            this.status = "FAIL";
-          } else {
-            this.status = `${code}`;
-          }
-        }
-      } finally {
-        this.$emit("uploaded", this.status, this.api_pin, this.file.name);
-        console.log("Finished!");
-      }
-    },
-
-    async request() {
-      console.log("Request to API");
-
-      var response = await axios.post(
-        `${process.env.VUE_APP_API_PRINTER}/file`,
-        {
-          surname: this.surname.trim(),
-          number: this.number.trim(),
-          filename: this.file.name,
-          source: "webapp",
-          options: {
-            pages: this.pages,
-            copies: this.copies,
-            // two_sided: this.twosided,
-          },
-        },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-
-      this.api_pin = response.data.pin;
-      console.log(`Request done ${this.api_pin}`);
-    },
-
-    async upload() {
-      console.log(`Upload file ${this.api_pin} to API`);
-
-      var body_data = new FormData();
-      body_data.append("file", this.file);
-
-      await axios.post(
-        `${process.env.VUE_APP_API_PRINTER}/file/${this.api_pin}`,
-        body_data
-      );
-    },
-  },
-};
-</script>

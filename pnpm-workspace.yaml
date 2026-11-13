@@ -1,0 +1,5 @@
+minimumReleaseAgeExclude:
+  - vue-router@4.6.5 || 5.5.1
+
+allowBuilds:
+  core-js: false

@@ -1,12 +1,12 @@
-FROM node:16 AS build
+FROM node:24 AS build
 ARG BUILD_MODE=production
 WORKDIR /app
-ADD ./package.json ./yarn.lock /app/
-RUN yarn
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml /app/
+RUN npm install --global pnpm@12.18.0 && pnpm install --frozen-lockfile
 ADD . /app
-RUN yarn build --mode ${BUILD_MODE}
+RUN pnpm build --mode ${BUILD_MODE}
 
-FROM nginx:1.21
+FROM nginx:stable
 ADD ./default.conf /etc/nginx/conf.d/default.conf
 ADD ./docker_entrypoint.sh /docker_entrypoint.sh
 COPY --from=build /app/dist /usr/share/nginx/html

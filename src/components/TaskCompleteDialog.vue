@@ -1,117 +1,44 @@
-<template>
-  <div class="dialog-container">
-    <div v-if="status === 'OK'">
-      <span class="success material-icons"> thumb_up </span>
-      <span class="success"><b>Готово!</b></span>
-      <span class="success">
-        Код для печати:<br />
-        <b>{{ pin }}</b>
-      </span>
-    </div>
-    <div v-else-if="status == 403">
-      <span class="error material-icons"> thumb_down </span>
-      <span class="error"><b>Не вышло!</b></span>
-      <span class="error small">
-        Проверьте правильность ввода фамилии и номера профсоюзного билета
-      </span>
-    </div>
-    <div v-else-if="status == 415">
-      <span class="error material-icons"> thumb_down </span>
-      <span class="error"><b>Не вышло!</b></span>
-      <span class="error small"> Отправлять можно только файлы PDF </span>
-    </div>
-    <div v-else-if="status == 422">
-      <span class="error material-icons"> thumb_down </span>
-      <span class="error"><b>Не вышло!</b></span>
-      <span class="error small">
-        Проверьте параметры печати и попробуйте снова
-      </span>
-    </div>
-    <div v-else>
-      <span class="error material-icons"> thumb_down </span>
-      <span class="error"><b>Не вышло!</b></span>
-      <span class="error small">
-        Мы не знаем почему, но попробуйте обновить страницу
-      </span>
-      <sup>
-        Если не помогло -
-        <a :href="feedback_url" target="_blank">напишите нам</a>
-      </sup>
-    </div>
-    <div class="form-actions">
-      <router-link
-        class="btn btn-success btn-lg"
-        type="button"
-        :to="`/qr#${pin}`"
-        v-if="isMobile"
-      >
-        Распечатать по QR
-      </router-link>
-      <button
-        class="btn btn-primary btn-lg"
-        type="button"
-        @click="this.$emit('click_return')"
-      >
-        Вернуться
-      </button>
-    </div>
-  </div>
-</template>
-
-<script>
+<script setup lang="ts">
+import { useRoute } from "vue-router";
+import AppIcon from "./AppIcon.vue";
+import PinCode from "./PinCode.vue";
 import { isMobile } from "@/utils/mobile";
-
-export default {
-  computed: {
-    isMobile() {
-      return isMobile();
-    },
-    feedback_url() {
-      return process.env.VUE_APP_FEEDBACK_FORM;
-    },
-  },
-  props: {
-    status: {
-      type: String,
-      required: true,
-    },
-    pin: {
-      type: String,
-      required: false,
-    },
-  },
-};
+defineProps<{ pin: string; saved: boolean }>();
+defineEmits<{ click_return: [] }>();
+const route = useRoute();
+const mobile = isMobile();
 </script>
-
-<style scoped>
-@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
-span.success {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-success);
-  text-align: center;
-  margin: 0 auto;
-}
-span.error {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-danger);
-  text-align: center;
-}
-span.error.small {
-  display: block;
-  font-size: 20px;
-  width: 100%;
-  color: var(--bs-black);
-  text-align: center;
-}
-span.pending {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-dark);
-  text-align: center;
-}
-</style>
+<template>
+  <section class="card result-card">
+    <span class="result-symbol"><AppIcon name="check" /></span>
+    <span class="eyebrow">Файл загружен</span>
+    <h1>Можно идти к принтеру</h1>
+    <p>Введите этот PIN на панели принтера,<br />чтобы получить документ.</p>
+    <PinCode :pin="pin" />
+    <div v-if="!saved" class="notice" role="status">
+      История недоступна в этом браузере. Сохраните PIN перед закрытием
+      страницы.
+    </div>
+    <router-link
+      v-if="mobile"
+      class="button primary full"
+      :to="{ path: '/qr', hash: `#${pin}`, query: route.query }"
+      ><AppIcon name="qr" />Распечатать по QR</router-link
+    >
+    <p v-if="mobile" class="form-note">
+      У принтера отсканируйте QR на его экране.
+    </p>
+    <button
+      class="button secondary full"
+      type="button"
+      @click="$emit('click_return')"
+    >
+      Загрузить ещё один файл
+    </button>
+    <router-link
+      class="text-link"
+      :to="{ path: '/history', query: route.query }"
+      >Открыть историю печати</router-link
+    >
+  </section>
+</template>

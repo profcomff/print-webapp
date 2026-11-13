@@ -1,202 +1,237 @@
-<template>
-  <div>
-    <h1 class="accordion-header" id="histAccordion-headingOne">
-      Печать по QR коду
-    </h1>
-    <small
-      ><a href="#" @click.prevent="this.$router.go(-1)">← Вернуться</a></small
-    >
-    <p>
-      Для быстрой печати по QR подойдите к принтеру и отсканируйте код под
-      кнопкой "Печать".
-    </p>
-    <div v-if="!isMobile">
-      <p class="alert alert-warning" role="alert">
-        Откройте эту страницу с смартфона или планшета
-      </p>
-    </div>
-    <div v-else-if="qrInitSuccess === undefined">
-      <p class="alert alert-success" role="alert">
-        Попытка подключиться к камере
-      </p>
-      <p>
-        Пожалуйста, предоставьте сайту доступ к камере вашего устройства. Вся
-        обработка происходит на вашем устройстве, разработчики получают доступ
-        только к отсканированному коду.
-      </p>
-    </div>
-    <div v-else-if="qrInitSuccess === false">
-      <p class="alert alert-secondary" role="alert">
-        Для печати необходимо предоставить сайту доступ к камере!
-      </p>
-      <p>
-        Пожалуйста, предоставьте сайту доступ к камере вашего устройства. Вся
-        обработка происходит на вашем устройстве, разработчики получают доступ
-        только к отсканированному коду.
-      </p>
-    </div>
-    <qrcode-stream
-      @decode="onDecode"
-      @init="onInit"
-      v-if="isMobile & (qrInitSuccess !== false) & !qrPrintStatus"
-    >
-    </qrcode-stream>
-    <div class="form-actions">
-      <div v-if="qrPrintStatus === 'pending'">
-        <span class="pending material-icons"> pending </span>
-        <span class="pending"><b>Выполняю</b></span>
-      </div>
-      <div v-if="qrPrintStatus === 'success'">
-        <span class="success material-icons"> thumb_up </span>
-        <span class="success"><b>Готово!</b></span>
-        <router-link to="/" class="btn btn-lg btn-primary">
-          Вернуться на главную
-        </router-link>
-        <router-link to="/history" class="btn btn-lg btn-primary">
-          Перейти к истории
-        </router-link>
-      </div>
-      <div v-if="qrPrintStatus === 'error'">
-        <span class="error material-icons"> thumb_down </span>
-        <span class="error"><b>Не вышло!</b></span>
-        <p>{{ qrPrintErrorMsg }}</p>
-        <router-link to="/" class="btn btn-lg btn-primary">
-          Вернуться на главную
-        </router-link>
-        <router-link to="/history" class="btn btn-lg btn-primary">
-          Перейти к истории
-        </router-link>
-        <div class="btn btn-lg btn-success" @click="reset">
-          Попробовать еще раз
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-import { QrcodeStream } from "vue3-qrcode-reader";
-import { log_open_qr, log_print_qr, log_error_qr } from "@/utils/marketing";
+<script setup lang="ts">
+import {
+  computed,
+  ref,
+  watch,
+  defineAsyncComponent,
+  onMounted,
+  onBeforeUnmount,
+} from "vue";
+import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import AppIcon from "@/components/AppIcon.vue";
 import { isMobile } from "@/utils/mobile";
-
-export default {
-  data: () => ({
-    pins: [],
-    qrInitSuccess: undefined,
-    qrPrintStatus: undefined,
-    qrPrintErrorMsg: "",
-  }),
-  computed: {
-    isMobile() {
-      return isMobile();
-    },
+import { parsePins } from "@/utils/printing";
+import { printQr, errorMessage } from "@/api/printer";
+import { log_open_qr, log_print_qr, log_error_qr } from "@/utils/marketing";
+const QrcodeStream = defineAsyncComponent(async () => {
+  const [scanner, wasm] = await Promise.all([
+    import(/* webpackChunkName: "camera" */ "vue-qrcode-reader"),
+    import("zxing-wasm/reader/zxing_reader.wasm"),
+  ]);
+  scanner.setZXingModuleOverrides({
+    locateFile: (path: string, prefix: string) =>
+      path.endsWith(".wasm") ? wasm.default : prefix + path,
+  });
+  return scanner.QrcodeStream;
+});
+const route = useRoute();
+const mobile = isMobile();
+const pins = computed(() => parsePins(route.hash));
+const state = ref<"idle" | "camera" | "pending" | "success" | "error">("idle");
+onBeforeRouteLeave(() => state.value !== "pending");
+onBeforeRouteUpdate(() => state.value !== "pending");
+function beforeUnload(event: BeforeUnloadEvent) {
+  if (state.value === "pending") { event.preventDefault(); event.returnValue = ""; }
+}
+const cameraReady = ref(false);
+const cameraError = ref("");
+const printError = ref("");
+const active = ref(true);
+let visibilityPaused = false;
+const paused = ref(false);
+function visibility() {
+  paused.value = document.hidden;
+  visibilityPaused = document.hidden;
+}
+function start() {
+  cameraError.value = "";
+  printError.value = "";
+  cameraReady.value = false;
+  state.value = "camera";
+}
+function onCameraError(error: Error) {
+  const messages: Record<string, string> = {
+    NotAllowedError:
+      "Нет доступа к камере. Разрешите камеру в настройках сайта. Если доступ заблокирован внутри «Твой ФФ», используйте PIN на панели принтера.",
+    NotFoundError: "Камера не найдена. Используйте PIN на панели принтера.",
+    NotReadableError:
+      "Камера занята другим приложением. Закройте его и попробуйте снова.",
+    OverconstrainedError:
+      "Не удалось включить камеру. Попробуйте другой браузер или используйте PIN.",
+    InsecureContextError:
+      "Камера доступна только через HTTPS. Откройте приложение по защищённой ссылке.",
+    StreamLoadTimeoutError:
+      "Камера не ответила. Закройте другие приложения с камерой и попробуйте снова или используйте PIN.",
+    NotSupportedError:
+      "Камера доступна только через HTTPS. Откройте приложение по защищённой ссылке.",
+    StreamApiNotSupportedError:
+      "Этот браузер не поддерживает камеру. Откройте приложение в Safari или Chrome.",
+  };
+  cameraError.value =
+    messages[error.name] ||
+    "Не удалось запустить сканер. Попробуйте снова или введите PIN на панели принтера.";
+  state.value = "idle";
+}
+async function detect(codes: { rawValue: string }[]) {
+  const token = codes[0]?.rawValue;
+  if (
+    !token ||
+    state.value !== "camera" ||
+    !pins.value.length ||
+    visibilityPaused
+  )
+    return;
+  const files = [...pins.value];
+  state.value = "pending"; // Set synchronously before the request; repeated frames cannot print twice.
+  try {
+    await printQr(token, files);
+    if (!active.value) return;
+    state.value = "success";
+    log_print_qr(files);
+  } catch (cause) {
+    if (!active.value) return;
+    printError.value =
+      cause instanceof Error && !("isAxiosError" in cause)
+        ? cause.message
+        : errorMessage(cause);
+    state.value = "error";
+    log_error_qr(files, cause);
+  }
+}
+watch(
+  () => route.hash,
+  () => {
+    if (state.value !== "pending") state.value = "idle";
   },
-  components: {
-    QrcodeStream,
-  },
-  methods: {
-    reset() {
-      this.qrInitSuccess = undefined;
-      this.qrPrintStatus = undefined;
-      this.qrPrintErrorMsg = "";
-    },
-    onDecode(decodedString) {
-      console.log(decodedString);
-      this.qrPrintStatus = "pending";
-
-      fetch(`${process.env.VUE_APP_API_PRINTER}/qr`, {
-        method: "POST",
-        cache: "no-cache",
-        redirect: "follow",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          qr_token: decodedString,
-          files: this.pins,
-        }),
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          console.log(response);
-          if (response.status === "ok") {
-            this.qrPrintStatus = "success";
-            log_print_qr(this.pins);
-          } else if (response.detail === "Terminal not found by qr") {
-            this.qrPrintStatus = "error";
-            this.qrPrintErrorMsg = "QR код недействительный";
-            log_error_qr(this.pins, response);
-          } else if (response.detail === "Terminal not found by qr") {
-            this.qrPrintStatus = "error";
-            this.qrPrintErrorMsg = "QR код недействительный";
-            log_error_qr(this.pins, response);
-          } else {
-            this.qrPrintStatus = "error";
-            this.qrPrintErrorMsg = "Неизвестная ошибка";
-            log_error_qr(this.pins, response);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          this.qrPrintStatus = "error";
-          this.qrPrintErrorMsg = "Ошибка сети";
-          log_error_qr(this.pins, error);
-        });
-    },
-    async onInit(promise) {
-      // show loading indicator
-
-      try {
-        await promise;
-        this.qrInitSuccess = true;
-      } catch (error) {
-        this.qrInitSuccess = false;
-        if (error.name === "NotAllowedError") {
-          // user denied camera access permisson
-        } else if (error.name === "NotFoundError") {
-          // no suitable camera device installed
-        } else if (error.name === "NotSupportedError") {
-          // page is not served over HTTPS (or localhost)
-        } else if (error.name === "NotReadableError") {
-          // maybe camera is already in use
-        } else if (error.name === "OverconstrainedError") {
-          // did you requested the front camera although there is none?
-        } else if (error.name === "StreamApiNotSupportedError") {
-          // browser seems to be lacking features
-        }
-      } finally {
-        // hide loading indicator
-      }
-    },
-  },
-  mounted() {
-    const location = document.location.hash.replace(/^#?/, "");
-    this.pins = location.split(",");
-    log_open_qr();
-  },
-};
+);
+onMounted(() => {
+  log_open_qr();
+  window.addEventListener("beforeunload", beforeUnload);
+  document.addEventListener("visibilitychange", visibility);
+  visibility();
+});
+onBeforeUnmount(() => {
+  active.value = false;
+  window.removeEventListener("beforeunload", beforeUnload);
+  document.removeEventListener("visibilitychange", visibility);
+});
 </script>
-
-<style scoped>
-@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
-span.success {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-success);
-  text-align: center;
-  margin: 0 auto;
-}
-span.error {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-danger);
-  text-align: center;
-}
-span.pending {
-  display: block;
-  font-size: 32px;
-  width: 100%;
-  color: var(--bs-dark);
-  text-align: center;
-}
-</style>
+<template>
+  <section>
+    <router-link
+      class="back-link"
+      :to="{ path: '/history', query: route.query }"
+      ><AppIcon name="arrow" />К документам</router-link
+    >
+    <div class="page-heading">
+      <span class="eyebrow">Вы уже у принтера?</span>
+      <h1>Быстрая печать по QR</h1>
+      <p>Наведите камеру на QR-код под кнопкой «Печать» на экране принтера.</p>
+    </div>
+    <div class="card qr-card">
+      <template v-if="!mobile"
+        >
+<span class="file-symbol"><AppIcon name="qr" /></span>
+        <h2>Сканируйте с телефона</h2>
+        <p>
+          Быстрая печать по QR доступна на телефоне и планшете. На компьютере
+          сохраните PIN и введите его на панели принтера.
+        </p>
+</template
+      >
+      <template v-else-if="!pins.length"
+        >
+<h2>Сначала выберите файл</h2>
+        <p>Откройте историю или загрузите новый документ для печати.</p>
+        <router-link
+          class="button primary full"
+          :to="{ path: '/history', query: route.query }"
+          >Выбрать документы</router-link
+        >
+</template
+      >
+      <template v-else-if="state === 'success'"
+        >
+<span class="result-symbol"><AppIcon name="check" /></span>
+        <h2>Отправлено на принтер</h2>
+        <p>Заберите распечатку и проверьте, что все страницы на месте.</p>
+        <router-link
+          class="button primary full"
+          :to="{ path: '/history', query: route.query }"
+          >К документам</router-link
+        >
+</template
+      >
+      <template v-else>
+        <div class="qr-summary">
+          <AppIcon name="file" /><span
+            >Файлов для печати: <strong>{{ pins.length }}</strong></span
+          >
+        </div>
+        <div v-if="state === 'camera'" class="camera-frame">
+          <QrcodeStream
+            :constraints="{ facingMode: { ideal: 'environment' } }"
+            :paused="paused"
+            @detect="detect"
+            @camera-on="cameraReady = true"
+            @error="onCameraError"
+          />
+          <div class="scan-guide" aria-hidden="true"></div>
+          <p v-if="!cameraReady" class="camera-loading" role="status">
+            Подключаем камеру…
+          </p>
+        </div>
+        <template v-else-if="state === 'pending'"
+          >
+<div class="spinner" aria-hidden="true"></div>
+          <h2 role="status">Отправляем на принтер…</h2>
+          <p>Дождитесь ответа. Не запускайте печать повторно.</p>
+</template
+        >
+        <template v-else-if="state === 'error'"
+          >
+<div class="notice error" role="alert">{{ printError }}</div>
+          <p>
+            Если ответа не было, задание могло дойти до принтера. Проверьте его
+            экран перед повторной отправкой.
+          </p>
+          <button class="button secondary full" type="button" @click="start">
+            Проверил, сканировать снова
+          </button>
+</template
+        >
+        <template v-else
+          >
+<span class="file-symbol"><AppIcon name="qr" /></span>
+          <h2>Наведите, сканируйте, готово</h2>
+          <p>После сканирования выбранные файлы сразу отправятся на печать.</p>
+          <div v-if="cameraError" class="notice error" role="alert">
+            {{ cameraError }}
+          </div>
+          <button class="button primary full" type="button" @click="start">
+            <AppIcon name="qr" />{{
+              cameraError ? "Попробовать снова" : "Включить камеру"
+            }}
+          </button>
+          <p class="form-note">
+            Разрешите доступ к камере. Изображение обрабатывается на вашем
+            устройстве.
+          </p>
+</template
+        >
+        <p v-if="state === 'camera'" class="form-note">
+          {{
+            cameraReady
+              ? "Поместите QR-код в рамку. Печать начнётся автоматически."
+              : "Разрешите доступ к камере в браузере."
+          }}
+        </p>
+        <details class="pin-fallback">
+          <summary>Распечатать по PIN без камеры</summary>
+          <p>Введите код на панели принтера:</p>
+          <code v-for="pin in pins" :key="pin">{{ pin }}</code>
+        </details>
+      </template>
+    </div>
+  </section>
+</template>
