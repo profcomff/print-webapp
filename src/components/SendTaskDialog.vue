@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { onBeforeRouteLeave } from "vue-router";
 import { profileSession, loadPrintProfile } from "@/api/profile";
 import AppIcon from "./AppIcon.vue";
 import { readStorage, writeStorage } from "@/utils/history";
@@ -17,16 +18,25 @@ const busy = ref(false);
 const progress = ref(0);
 const error = ref("");
 const dragging = ref(false);
+const surnameEdited = ref(false);
+const numberEdited = ref(false);
+onBeforeRouteLeave(() => !busy.value);
+function beforeUnload(event: BeforeUnloadEvent) {
+  if (busy.value) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+}
+onBeforeUnmount(() => window.removeEventListener("beforeunload", beforeUnload));
 onMounted(async () => {
+  window.addEventListener("beforeunload", beforeUnload);
   if (!session) return;
-  const initialSurname = surname.value;
-  const initialNumber = number.value;
   try {
     const identity = await loadPrintProfile(session);
     if (!busy.value) {
-      if (identity.surname && surname.value === initialSurname)
+      if (identity.surname && !surnameEdited.value)
         surname.value = identity.surname;
-      if (identity.number && number.value === initialNumber)
+      if (identity.number && !numberEdited.value)
         number.value = identity.number;
     }
   } catch {
@@ -141,6 +151,7 @@ async function send() {
             placeholder="Иванов"
             required
             maxlength="100"
+            @input="surnameEdited = true"
           />
         </div>
         <div class="field">
@@ -153,6 +164,7 @@ async function send() {
             placeholder="1012000"
             required
             maxlength="50"
+            @input="numberEdited = true"
           />
         </div>
       </div>
@@ -189,8 +201,7 @@ async function send() {
     <div v-if="busy" class="upload-progress" role="status">
       <span>{{
         progress ? `Загружаем файл · ${progress}%` : "Подготавливаем файл…"
-      }}</span
-      ><progress
+      }}</span><progress
         :value="progress"
         max="100"
         aria-label="Загрузка файла"

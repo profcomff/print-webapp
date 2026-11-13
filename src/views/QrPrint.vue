@@ -7,7 +7,7 @@ import {
   onMounted,
   onBeforeUnmount,
 } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 import AppIcon from "@/components/AppIcon.vue";
 import { isMobile } from "@/utils/mobile";
 import { parsePins } from "@/utils/printing";
@@ -28,6 +28,11 @@ const route = useRoute();
 const mobile = isMobile();
 const pins = computed(() => parsePins(route.hash));
 const state = ref<"idle" | "camera" | "pending" | "success" | "error">("idle");
+onBeforeRouteLeave(() => state.value !== "pending");
+onBeforeRouteUpdate(() => state.value !== "pending");
+function beforeUnload(event: BeforeUnloadEvent) {
+  if (state.value === "pending") { event.preventDefault(); event.returnValue = ""; }
+}
 const cameraReady = ref(false);
 const cameraError = ref("");
 const printError = ref("");
@@ -101,11 +106,13 @@ watch(
 );
 onMounted(() => {
   log_open_qr();
+  window.addEventListener("beforeunload", beforeUnload);
   document.addEventListener("visibilitychange", visibility);
   visibility();
 });
 onBeforeUnmount(() => {
   active.value = false;
+  window.removeEventListener("beforeunload", beforeUnload);
   document.removeEventListener("visibilitychange", visibility);
 });
 </script>
