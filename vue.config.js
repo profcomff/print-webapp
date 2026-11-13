@@ -1,6 +1,9 @@
 const process = require("node:process");
 
 module.exports = {
+  devServer: {
+    allowedHosts: [".coder.dyakov.space"],
+  },
   chainWebpack(config) {
     // Both BUILD_MODE values must satisfy the existing nginx app.js redirect.
     if (process.argv.includes("build")) {

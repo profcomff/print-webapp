@@ -14,6 +14,8 @@ pnpm start
 
 Приложение откроется на `http://localhost:9004`. `make run` запускает ту же команду.
 
+Dev-сервер также принимает адреса проброшенных портов `*.coder.dyakov.space` для просмотра через Coder.
+
 ```sh
 pnpm test
 pnpm typecheck
