@@ -23,9 +23,8 @@ watch(
   <main class="app-shell">
     <router-view />
     <footer>
-      Бесплатная печать для членов профсоюза<span
-        >PDF · чёрно-белая печать</span
-      >
+      Сделано в
+      <a href="https://dyakov.space/" target="_blank" rel="noopener noreferrer">dyakov.space</a>
     </footer>
     <nav class="bottom-nav" aria-label="Разделы печати">
       <router-link

@@ -410,10 +410,6 @@ progress {
   font-size: 10px;
   line-height: 1.8;
 }
-.app-shell > footer span {
-  display: block;
-  font-size: 9px;
-}
 .result-card {
   text-align: center;
   padding: 36px 26px;
