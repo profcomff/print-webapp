@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { watch } from "vue";
 import { useRoute } from "vue-router";
 import AppIcon from "@/components/AppIcon.vue";
 const route = useRoute();
-const content = ref<HTMLElement | null>(null);
 watch(
   () => route.path,
   () => {
-    content.value?.scrollTo({ top: 0 });
     document.dispatchEvent(
       new CustomEvent("change-header-layout", {
         detail: {
@@ -18,27 +16,20 @@ watch(
       }),
     );
   },
-  { immediate: true, flush: "post" },
+  { immediate: true },
 );
 </script>
 <template>
   <main class="app-shell">
-    <div ref="content" class="app-content">
-      <router-view />
-      <footer>
-        Бесплатная печать для членов профсоюза
-        <span>PDF · чёрно-белая печать</span>
-        <div>
-          Сделано в
-          <a
-            href="https://dyakov.space/"
-            target="_blank"
-            rel="noopener noreferrer"
-            >dyakov.space</a
-          >
-        </div>
-      </footer>
-    </div>
+    <router-view />
+    <footer>
+      Бесплатная печать для членов профсоюза
+      <span>PDF · чёрно-белая печать</span>
+      <div>
+        Сделано в
+        <a href="https://dyakov.space/" target="_blank" rel="noopener noreferrer">dyakov.space</a>
+      </div>
+    </footer>
     <nav class="bottom-nav" aria-label="Разделы печати">
       <router-link
         :to="{ path: '/', query: route.query }"
