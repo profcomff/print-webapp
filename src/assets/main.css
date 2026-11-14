@@ -16,12 +16,6 @@
 * {
   box-sizing: border-box;
 }
-html,
-body,
-#app {
-  height: 100%;
-  overflow: hidden;
-}
 body {
   margin: 0;
 }
@@ -84,33 +78,20 @@ a {
   border-radius: 5px;
 }
 .app-shell {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
   max-width: 620px;
-  height: 100%;
   margin: 0 auto;
+  padding: 20px 22px 24px;
 }
-.app-content {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  padding: 24px 22px;
-}
-.bottom-nav {
-  flex-shrink: 0;
-  width: 100%;
+.tabs {
   display: flex;
   gap: 8px;
-  padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+  margin-bottom: 20px;
+  padding: 4px;
   border: 1px solid var(--border);
-  border-bottom: 0;
-  border-radius: 16px 16px 0 0;
+  border-radius: 13px;
   background: #fff;
-  box-shadow: 0 -4px 18px #26344c08;
 }
-.bottom-nav a {
+.tabs a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,11 +105,11 @@ a {
   font-size: 14px;
   font-weight: 600;
 }
-.bottom-nav a.active {
+.tabs a.active {
   background: var(--soft);
   color: var(--accent);
 }
-.bottom-nav svg {
+.tabs svg {
   width: 18px;
   height: 18px;
 }
@@ -413,7 +394,7 @@ progress {
   color: #6f8199;
   background: #fff;
 }
-.app-content > footer {
+.app-shell > footer {
   border-top: 1px solid var(--border);
   margin-top: 28px;
   padding-top: 18px;
@@ -422,11 +403,11 @@ progress {
   font-size: 10px;
   line-height: 1.8;
 }
-.app-content > footer span {
+.app-shell > footer span {
   display: block;
   font-size: 9px;
 }
-.app-content > footer div {
+.app-shell > footer div {
   margin-top: 8px;
 }
 .result-card {
@@ -699,8 +680,8 @@ input[type="checkbox"] {
   }
 }
 @media (max-width: 440px) {
-  .app-content {
-    padding: 20px 14px 24px;
+  .app-shell {
+    padding: 16px 14px 24px;
   }
   .card {
     padding: 20px;
