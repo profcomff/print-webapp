@@ -1,9 +1,60 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import {
+  ref,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  type CSSProperties,
+} from "vue";
 import { useRoute } from "vue-router";
 import AppIcon from "@/components/AppIcon.vue";
 const route = useRoute();
 const content = ref<HTMLElement | null>(null);
+const visibleViewport = ref<CSSProperties>({});
+let viewportObserver: IntersectionObserver | undefined;
+let viewportRefresh: number | undefined;
+function stopViewportRefresh() {
+  window.clearInterval(viewportRefresh);
+  viewportRefresh = undefined;
+}
+onMounted(() => {
+  if (window.self === window.top) return;
+  // The host may clip a cross-origin iframe. Its innerHeight still includes
+  // the clipped area; intersectionRect describes the part actually on screen.
+  viewportObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry?.isIntersecting || entry.intersectionRect.height < 1) {
+        stopViewportRefresh();
+        return;
+      }
+      const visible = entry.intersectionRect;
+      const full = entry.boundingClientRect;
+      const clipped = visible.height < full.height - 1;
+      visibleViewport.value = !clipped
+        ? {}
+        : {
+            height: `${Math.floor(visible.height)}px`,
+            marginTop: `${Math.max(0, Math.ceil(visible.top - full.top))}px`,
+          };
+      if (!clipped) stopViewportRefresh();
+      else if (viewportRefresh === undefined) {
+        // ponytail: recheck clipped cross-origin viewports at 5 Hz; replace
+        // with host viewport messages if the embedding app supplies them.
+        viewportRefresh = window.setInterval(() => {
+          viewportObserver?.unobserve(document.documentElement);
+          viewportObserver?.observe(document.documentElement);
+        }, 200);
+      }
+    },
+    { threshold: [0, 1] },
+  );
+  // Observe the full document, whose size is independent of the adjusted shell.
+  viewportObserver.observe(document.documentElement);
+});
+onBeforeUnmount(() => {
+  viewportObserver?.disconnect();
+  stopViewportRefresh();
+});
 watch(
   () => route.path,
   () => {
@@ -22,7 +73,7 @@ watch(
 );
 </script>
 <template>
-  <main class="app-shell">
+  <main class="app-shell" :style="visibleViewport">
     <div ref="content" class="app-content">
       <router-view />
       <footer>
