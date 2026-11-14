@@ -16,6 +16,12 @@
 * {
   box-sizing: border-box;
 }
+html,
+body,
+#app {
+  height: 100%;
+  overflow: hidden;
+}
 body {
   margin: 0;
 }
@@ -78,17 +84,23 @@ a {
   border-radius: 5px;
 }
 .app-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   max-width: 620px;
+  height: 100%;
   margin: 0 auto;
-  padding: 24px 22px calc(88px + env(safe-area-inset-bottom, 0px));
+}
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: 24px 22px;
 }
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  width: min(100%, 620px);
+  flex-shrink: 0;
+  width: 100%;
   display: flex;
   gap: 8px;
   padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
@@ -401,7 +413,7 @@ progress {
   color: #6f8199;
   background: #fff;
 }
-.app-shell > footer {
+.app-content > footer {
   border-top: 1px solid var(--border);
   margin-top: 28px;
   padding-top: 18px;
@@ -410,11 +422,11 @@ progress {
   font-size: 10px;
   line-height: 1.8;
 }
-.app-shell > footer span {
+.app-content > footer span {
   display: block;
   font-size: 9px;
 }
-.app-shell > footer div {
+.app-content > footer div {
   margin-top: 8px;
 }
 .result-card {
@@ -557,7 +569,7 @@ input[type="checkbox"] {
 }
 .selection-bar {
   position: sticky;
-  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -687,8 +699,8 @@ input[type="checkbox"] {
   }
 }
 @media (max-width: 440px) {
-  .app-shell {
-    padding: 20px 14px calc(88px + env(safe-area-inset-bottom, 0px));
+  .app-content {
+    padding: 20px 14px 24px;
   }
   .card {
     padding: 20px;
