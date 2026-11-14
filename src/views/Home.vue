@@ -21,11 +21,6 @@ onMounted(log_open_app);
     @click_return="pin = ''"
   />
   <section v-else>
-    <div class="page-heading">
-      <span class="eyebrow">Всё начинается с файла</span>
-      <h1>Что распечатаем?</h1>
-      <p>Загрузите PDF, а затем заберите распечатку у принтера.</p>
-    </div>
     <SendTaskDialog @uploaded="uploaded" />
     <aside class="how-it-works">
       <h2>Как это работает</h2>

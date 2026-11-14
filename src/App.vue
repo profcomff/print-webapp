@@ -21,16 +21,7 @@ watch(
 </script>
 <template>
   <main class="app-shell">
-    <router-view />
-    <footer>
-      Бесплатная печать для членов профсоюза
-      <span>PDF · чёрно-белая печать</span>
-      <div>
-        Сделано в
-        <a href="https://dyakov.space/" target="_blank" rel="noopener noreferrer">dyakov.space</a>
-      </div>
-    </footer>
-    <nav class="bottom-nav" aria-label="Разделы печати">
+    <nav class="tabs" aria-label="Разделы печати">
       <router-link
         :to="{ path: '/', query: route.query }"
         :class="{ active: route.path !== '/history' }"
@@ -42,5 +33,19 @@ watch(
         ><AppIcon name="history" />История</router-link
       >
     </nav>
+    <router-view />
+    <footer>
+      Бесплатная печать для членов профсоюза
+      <span>PDF · чёрно-белая печать</span>
+      <div>
+        Сделано в
+        <a
+          href="https://dyakov.space/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >dyakov.space</a
+        >
+      </div>
+    </footer>
   </main>
 </template>

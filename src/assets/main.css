@@ -80,25 +80,18 @@ a {
 .app-shell {
   max-width: 620px;
   margin: 0 auto;
-  padding: 24px 22px calc(88px + env(safe-area-inset-bottom, 0px));
+  padding: 20px 22px 24px;
 }
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  width: min(100%, 620px);
+.tabs {
   display: flex;
   gap: 8px;
-  padding: 8px 14px calc(8px + env(safe-area-inset-bottom, 0px));
+  margin-bottom: 20px;
+  padding: 4px;
   border: 1px solid var(--border);
-  border-bottom: 0;
-  border-radius: 16px 16px 0 0;
+  border-radius: 13px;
   background: #fff;
-  box-shadow: 0 -4px 18px #26344c08;
 }
-.bottom-nav a {
+.tabs a {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,11 +105,11 @@ a {
   font-size: 14px;
   font-weight: 600;
 }
-.bottom-nav a.active {
+.tabs a.active {
   background: var(--soft);
   color: var(--accent);
 }
-.bottom-nav svg {
+.tabs svg {
   width: 18px;
   height: 18px;
 }
@@ -557,7 +550,7 @@ input[type="checkbox"] {
 }
 .selection-bar {
   position: sticky;
-  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -688,7 +681,7 @@ input[type="checkbox"] {
 }
 @media (max-width: 440px) {
   .app-shell {
-    padding: 20px 14px calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 14px 24px;
   }
   .card {
     padding: 20px;
