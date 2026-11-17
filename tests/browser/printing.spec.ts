@@ -8,6 +8,7 @@ test("upload, PIN, old history and embedded context survive navigation", async (
     uploads = 0;
   await page.route("**/print/file", async (route) => {
     reserves++;
+    expect(route.request().postDataJSON().options.two_sided).toBe(false);
     await new Promise((resolve) => setTimeout(resolve, 200));
     await route.fulfill({ json: { pin: "AB12CD" } });
   });
@@ -45,6 +46,51 @@ test("upload, PIN, old history and embedded context survive navigation", async (
     ),
   ).toBe(true);
 });
+for (const twoSided of [true, false]) {
+  test(`print settings send two_sided=${twoSided} after toggling the checkbox`, async ({
+    page,
+  }) => {
+    await page.route("**/print/file", (route) =>
+      route.fulfill({ json: { pin: "AB12CD" } }),
+    );
+    await page.route("**/print/file/AB12CD", (route) =>
+      route.fulfill({ json: { pin: "AB12CD" } }),
+    );
+    await page.goto("/");
+    await page.getByLabel("Фамилия", { exact: true }).fill("Иванов");
+    await page
+      .getByLabel("Номер профсоюзного билета", { exact: true })
+      .fill("123456");
+    await page.locator("#file").setInputFiles({
+      name: "Лекция.pdf",
+      mimeType: "application/pdf",
+      buffer: Buffer.from("%PDF-1.7\nexample"),
+    });
+    await page.getByText("Настройки печати", { exact: false }).click();
+    const checkbox = page.getByRole("checkbox", {
+      name: "Двусторонняя печать",
+    });
+    await expect(checkbox).not.toBeChecked();
+    await checkbox.check();
+    await checkbox.setChecked(twoSided);
+    await page.getByLabel("Количество копий").fill("2");
+    await page.getByLabel("Страницы", { exact: true }).fill("1-3, 5");
+
+    const reservation = page.waitForRequest(
+      (request) =>
+        request.url().endsWith("/print/file") && request.method() === "POST",
+    );
+    await page.getByRole("button", { name: "Загрузить для печати" }).click();
+    expect((await reservation).postDataJSON().options).toEqual({
+      copies: 2,
+      pages: "1-3,5",
+      two_sided: twoSided,
+    });
+    await expect(
+      page.getByRole("heading", { name: "Можно идти к принтеру" }),
+    ).toBeVisible();
+  });
+}
 test("upload failure preserves input and corrupt history remains usable", async ({
   page,
 }) => {

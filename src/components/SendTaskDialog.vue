@@ -14,6 +14,7 @@ const number = ref(session ? "" : readStorage("number"));
 const file = ref<File>();
 const copies = ref(1);
 const pages = ref("");
+const twoSided = ref(false);
 const busy = ref(false);
 const progress = ref(0);
 const error = ref("");
@@ -94,6 +95,7 @@ async function send() {
         file: file.value,
         copies: copies.value,
         pages: pages.value,
+        twoSided: twoSided.value,
       },
       (percent) => {
         progress.value = percent;
@@ -171,7 +173,9 @@ async function send() {
       <details class="print-settings">
         <summary>
           Настройки печати
-          <span>{{ copies }} коп. · {{ pages || "Все страницы" }}</span>
+          <span>{{ copies }} коп. · {{ pages || "Все страницы" }}{{
+            twoSided ? " · Двусторонняя" : ""
+          }}</span>
         </summary>
         <div class="fields-grid settings-fields">
           <div class="field">
@@ -194,6 +198,10 @@ async function send() {
               aria-describedby="pages-help"
             /><small id="pages-help">Например: 1-3, 5</small>
           </div>
+          <label class="print-option" for="two-sided">
+            <input id="two-sided" v-model="twoSided" type="checkbox" />
+            Двусторонняя печать
+          </label>
         </div>
       </details>
     </fieldset>

@@ -6,6 +6,7 @@ export interface PrintRequest {
   file: File;
   copies: number;
   pages: string;
+  twoSided: boolean;
 }
 const base = () => process.env.VUE_APP_API_PRINTER;
 
@@ -20,7 +21,11 @@ export async function uploadFile(
       number: input.number.trim(),
       filename: input.file.name,
       source: "webapp",
-      options: { copies: input.copies, pages: input.pages.replace(/\s/g, "") },
+      options: {
+        copies: input.copies,
+        pages: input.pages.replace(/\s/g, ""),
+        two_sided: input.twoSided,
+      },
     },
     { timeout: 30_000 },
   );

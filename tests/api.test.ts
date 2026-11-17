@@ -18,7 +18,14 @@ test("upload reserves PIN then sends multipart PDF with progress; QR sends uniqu
   const file = new File(["%PDF-1.7"], "notes.pdf");
   assert.equal(
     await uploadFile(
-      { surname: " Иванов ", number: " 123 ", file, copies: 1, pages: "" },
+      {
+        surname: " Иванов ",
+        number: " 123 ",
+        file,
+        copies: 1,
+        pages: "",
+        twoSided: false,
+      },
       () => {},
     ),
     "AB12",
@@ -26,6 +33,11 @@ test("upload reserves PIN then sends multipart PDF with progress; QR sends uniqu
   assert.equal(calls.length, 2);
   assert.match(calls[0].url, /\/file$/);
   assert.equal(JSON.parse(calls[0].data as string).surname, "Иванов");
+  assert.deepEqual(JSON.parse(calls[0].data as string).options, {
+    copies: 1,
+    pages: "",
+    two_sided: false,
+  });
   assert.match(calls[1].url, /\/file\/AB12$/);
   assert.equal((calls[1].data as FormData).get("file"), file);
   await printQr("token", ["AB12", "AB12"]);
@@ -60,6 +72,7 @@ test("failed reservation does not upload and failed QR is not treated as success
         file: new File(["%PDF-"], "n.pdf"),
         copies: 1,
         pages: "",
+        twoSided: false,
       },
       () => {},
     ),

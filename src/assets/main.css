@@ -283,6 +283,14 @@ summary span {
 .settings-fields {
   padding-bottom: 20px;
 }
+.print-option {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
 .button {
   min-height: 46px;
   padding: 12px 18px;
